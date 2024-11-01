@@ -42,8 +42,8 @@ jot view
 Edit an entry:
 ```bash
 jot edit 0
-Enter new body: "My first journal in Jot!"
 ```
+Enter new body: "My ~~second~~ first journal in Jot!"
 Remove an entry:
 ```bash
 jot remove 0
