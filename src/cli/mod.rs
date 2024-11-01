@@ -15,6 +15,7 @@ enum Commands {
     Remove { id: usize },
     View,
     Edit { id: usize },
+    Search { query: String },
 }
 
 pub fn run() -> JotResult<()> {
@@ -27,5 +28,6 @@ pub fn run() -> JotResult<()> {
         Commands::Remove { id } => commands::remove::execute(&mut journal, id),
         Commands::View => commands::view::execute(&journal),
         Commands::Edit { id } => commands::edit::execute(&mut journal, id),
+        Commands::Search { query } => commands::search::execute(&journal, &query),
     }
 }

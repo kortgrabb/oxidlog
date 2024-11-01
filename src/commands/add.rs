@@ -5,7 +5,7 @@ pub fn execute(journal: &mut Journal, content: String) -> JotResult<()> {
     let entry = journal.add_entry(content);
     match storage::save_journal(journal) {
         Ok(_) => {
-            println!("Added entry: {}", entry.content);
+            println!("Added entry: {}", entry.body);
             Ok(())
         }
         Err(e) => {

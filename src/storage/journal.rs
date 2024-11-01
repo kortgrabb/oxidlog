@@ -7,7 +7,7 @@ use std::path::PathBuf;
 pub struct Entry {
     pub id: usize,
     pub timestamp: DateTime<Utc>,
-    pub content: String,
+    pub body: String,
 }
 
 impl fmt::Display for Entry {
@@ -17,7 +17,7 @@ impl fmt::Display for Entry {
             "[{}] {}: {}",
             self.id,
             self.timestamp.format("%Y-%m-%d %H:%M:%S"),
-            self.content
+            self.body
         )
     }
 }
@@ -49,7 +49,7 @@ impl EntryBuilder {
         Entry {
             id: self.id.expect("id is required"),
             timestamp: Utc::now(),
-            content: self.content.expect("content is required"),
+            body: self.content.expect("content is required"),
         }
     }
 }
@@ -89,6 +89,20 @@ impl Journal {
     pub fn remove_entry(&mut self, id: usize) -> Option<Entry> {
         if let Some(index) = self.entries.iter().position(|e| e.id == id) {
             Some(self.entries.remove(index))
+        } else {
+            None
+        }
+    }
+
+    pub fn edit_entry(&mut self, id: usize, new_body: &str) -> Option<Entry> {
+        if let Some(entry) = self.entries.iter_mut().find(|e| e.id == id) {
+            let old_body = entry.body.clone();
+            entry.body = new_body.to_string();
+            Some(Entry {
+                id: entry.id,
+                timestamp: entry.timestamp,
+                body: old_body,
+            })
         } else {
             None
         }

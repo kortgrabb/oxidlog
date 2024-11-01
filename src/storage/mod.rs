@@ -81,7 +81,7 @@ mod tests {
     fn test_entry_builder() {
         let entry = Entry::builder().id(0).content("test".to_string()).build();
         assert_eq!(entry.id, 0);
-        assert_eq!(entry.content, "test");
+        assert_eq!(entry.body, "test");
     }
 
     #[test]
@@ -159,7 +159,7 @@ mod tests {
         journal.add_entry("test".to_string());
 
         let entry = journal.get_entry(0);
-        assert!(entry.is_some() && entry.unwrap().content == "test");
+        assert!(entry.is_some() && entry.unwrap().body == "test");
         Ok(())
     }
 }
