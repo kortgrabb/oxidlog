@@ -1,7 +1,4 @@
-use crate::{
-    error::JotResult,
-    storage::{Entry, Journal},
-};
+use crate::{error::JotResult, storage::Journal, utils};
 
 // TODO: search by tags
 pub fn execute(journal: &Journal, query: &str, tags: Vec<String>) -> JotResult<()> {
@@ -15,13 +12,7 @@ pub fn execute(journal: &Journal, query: &str, tags: Vec<String>) -> JotResult<(
             .iter()
             .filter(|e| {
                 let content_matches = e.body.to_lowercase().contains(&term);
-                let tag_matches = tags.is_empty()
-                    || e.tags
-                        .iter()
-                        .map(|t| t.trim_start_matches('#'))
-                        .any(|t| tags.contains(&t.to_string()));
-
-                content_matches && tag_matches
+                utils::matches_tags(&tags, &e.tags) && content_matches
             })
             .map(|e| format!("{}", e))
             .collect();

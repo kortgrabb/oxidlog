@@ -1,56 +1,46 @@
-use crate::{error::JotResult, storage::Journal};
+use crate::{error::JotResult, storage::Journal, utils};
 
 pub fn execute(
     journal: &Journal,
     id: Option<usize>,
     from: Option<String>,
     to: Option<String>,
+    tags: Vec<String>,
 ) -> JotResult<()> {
+    // dbg!(&tags);
     if let Some(id) = id {
         if let Some(entry) = journal.entries().iter().find(|e| e.id == id) {
-            println!("ID: {}", entry.id);
-            println!("Body: {}", entry.body);
-            println!("Tags: {:?}", entry.tags);
-            println!("Date: {}", entry.date);
-            println!("Timestamp: {}", entry.timestamp);
+            println!("{}", entry);
         } else {
-            eprintln!("Entry with id {} not found", id);
+            println!("Entry #{} not found", id);
         }
     } else {
         let entries = journal.get_entries();
         let entries = entries
             .iter()
+            // Filter entries by date and tags
             .filter(|e| {
-                // TODO: move into utils
                 if let Some(from) = &from {
-                    // parse simple date format: yyyy-mm-dd
-                    if let Ok(from) = chrono::NaiveDate::parse_from_str(from, "%Y-%m-%d") {
-                        if e.date < from {
-                            return false;
-                        }
-                    } else {
-                        eprintln!("Invalid date format for --from");
-                        println!("Expected format: yyyy-mm-dd");
-                        std::process::exit(1);
+                    let parsed_date = utils::parse_date(from);
+                    if e.date < parsed_date {
+                        return false;
                     }
                 }
                 if let Some(to) = &to {
-                    if let Ok(to) = chrono::NaiveDate::parse_from_str(to, "%Y-%m-%d") {
-                        if e.date > to {
-                            return false;
-                        }
-                    } else {
-                        eprintln!("Invalid date format for --to");
-                        println!("Expected format: yyyy-mm-dd");
-                        std::process::exit(1);
+                    let parsed_date = utils::parse_date(to);
+                    if e.date > parsed_date {
+                        return false;
                     }
                 }
-                true
+                utils::matches_tags(&e.tags, &tags)
             })
             .collect::<Vec<_>>();
 
-        for entry in entries {
-            println!("{}", entry);
+        if entries.is_empty() {
+            println!("No entries found.");
+        } else {
+            println!("{} entries found", entries.len());
+            entries.iter().for_each(|e| println!("{}", e));
         }
     }
 

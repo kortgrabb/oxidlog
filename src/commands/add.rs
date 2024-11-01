@@ -5,7 +5,7 @@ pub fn execute(journal: &mut Journal, content: String) -> JotResult<()> {
     let tags = content
         .split_whitespace()
         .filter(|w| w.starts_with('#'))
-        .map(|w| w.to_string())
+        .map(|w| w[1..].to_string())
         .collect();
 
     if content.is_empty() {

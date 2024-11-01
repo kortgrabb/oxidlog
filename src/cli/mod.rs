@@ -27,6 +27,8 @@ enum Commands {
         from: Option<String>,
         #[clap(short, long)]
         to: Option<String>,
+        #[clap(long)]
+        tags: Vec<String>,
     },
     Edit {
         id: usize,
@@ -45,8 +47,10 @@ pub fn run() -> JotResult<()> {
     match cli.command {
         Commands::Init => commands::init::execute(),
         Commands::Add { entry } => commands::add::execute(&mut journal, entry),
-        Commands::Remove { id, from, to } => commands::remove::execute(&mut journal, id),
-        Commands::View { id, from, to } => commands::view::execute(&journal, id, from, to),
+        Commands::Remove { id, from, to } => commands::remove::execute(&mut journal, id, from, to),
+        Commands::View { id, from, to, tags } => {
+            commands::view::execute(&journal, id, from, to, tags)
+        }
         Commands::Edit { id } => commands::edit::execute(&mut journal, id),
         Commands::Search { query, tags } => commands::search::execute(&journal, &query, tags),
     }

@@ -5,7 +5,12 @@ use crate::{
 
 // TODO: range support (e.g. 1..5) for multiple entries
 // TODO: to/from date range support
-pub fn execute(journal: &mut Journal, id: usize) -> JotResult<()> {
+pub fn execute(
+    journal: &mut Journal,
+    id: usize,
+    from: Option<String>,
+    to: Option<String>,
+) -> JotResult<()> {
     match journal.remove_entry(id) {
         Some(_) => match storage::save_journal(journal) {
             Ok(_) => {
