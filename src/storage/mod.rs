@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 pub use journal::{Entry, Journal};
 
+// TODO: add config
 const DEFAULT_JOURNAL_DIR: &str = ".journal";
 const DEFAULT_JOURNAL_SAVE_FILE: &str = "journal.json";
 
