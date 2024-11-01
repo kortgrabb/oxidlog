@@ -5,7 +5,7 @@ pub fn execute(journal: &Journal) -> JotResult<()> {
     if entires.is_empty() {
         println!("No entries found.");
     } else {
-        for (i, entry) in entires.iter().enumerate() {
+        for entry in entires.iter() {
             println!("{entry}");
         }
     }

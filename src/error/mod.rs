@@ -13,9 +13,6 @@ pub enum JotError {
     #[error("Failed to edit entry: {0}")]
     EditError(String),
 
-    #[error("Failed to view entries: {0}")]
-    ViewError(String),
-
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
 
