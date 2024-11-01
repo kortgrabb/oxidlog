@@ -1,0 +1,6 @@
+[book]
+authors = ["kortgrabb"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Jot User Docs"

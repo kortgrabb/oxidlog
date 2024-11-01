@@ -79,8 +79,8 @@ mod tests {
     }
 
     #[test]
-    fn test_entry_builder() {
-        let entry = Entry::builder().id(0).content("test".to_string()).build();
+    fn test_entry_new() {
+        let entry = Entry::new(0, "test".to_string(), vec![]);
         assert_eq!(entry.id, 0);
         assert_eq!(entry.body, "test");
     }
@@ -128,7 +128,9 @@ mod tests {
         let path = temp_dir.path().join("test.json");
 
         let mut journal = Journal::new(path.clone());
-        journal.add_entry("test".to_string());
+        let entry = Entry::new(0, "test".to_string(), vec![]);
+        journal.add_entry(entry);
+        save_journal(&journal)?;
 
         let journal = load_from_path(path)?;
         assert_eq!(journal.entries().len(), 1);
@@ -141,10 +143,13 @@ mod tests {
         let path = temp_dir.path().join("test.json");
 
         let mut journal = Journal::new(path.clone());
-        journal.add_entry("test".to_string());
+        let entry = Entry::new(0, "test".to_string(), vec![]);
+        journal.add_entry(entry);
+        save_journal(&journal)?;
 
         let entry = journal.remove_entry(0);
         assert!(entry.is_some());
+        save_journal(&journal)?;
 
         let journal = load_from_path(path)?;
         assert!(journal.entries().is_empty());
@@ -157,7 +162,8 @@ mod tests {
         let path = temp_dir.path().join("test.json");
 
         let mut journal = Journal::new(path.clone());
-        journal.add_entry("test".to_string());
+        let entry = Entry::new(0, "test".to_string(), vec![]);
+        journal.add_entry(entry);
 
         let entry = journal.get_entry(0);
         assert!(entry.is_some() && entry.unwrap().body == "test");

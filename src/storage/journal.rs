@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
@@ -7,7 +7,9 @@ use std::path::PathBuf;
 pub struct Entry {
     pub id: usize,
     pub timestamp: DateTime<Utc>,
+    pub date: NaiveDate,
     pub body: String,
+    pub tags: Vec<String>,
 }
 
 impl fmt::Display for Entry {
@@ -23,36 +25,50 @@ impl fmt::Display for Entry {
 }
 
 impl Entry {
-    pub fn builder() -> EntryBuilder {
-        EntryBuilder::default()
-    }
-}
-
-#[derive(Default)]
-pub struct EntryBuilder {
-    id: Option<usize>,
-    content: Option<String>,
-}
-
-impl EntryBuilder {
-    pub fn id(mut self, id: usize) -> Self {
-        self.id = Some(id);
-        self
-    }
-
-    pub fn content(mut self, content: String) -> Self {
-        self.content = Some(content);
-        self
-    }
-
-    pub fn build(self) -> Entry {
-        Entry {
-            id: self.id.expect("id is required"),
+    pub fn new(id: usize, body: String, tags: Vec<String>) -> Self {
+        Self {
+            id,
             timestamp: Utc::now(),
-            body: self.content.expect("content is required"),
+            date: Utc::now().naive_utc().date(),
+            body,
+            tags,
         }
     }
 }
+
+// #[derive(Default)]
+// pub struct EntryBuilder {
+//     id: Option<usize>,
+//     content: Option<String>,
+//     tags: Option<Vec<String>>,
+// }
+
+// impl EntryBuilder {
+//     pub fn id(mut self, id: usize) -> Self {
+//         self.id = Some(id);
+//         self
+//     }
+
+//     pub fn content(mut self, content: String) -> Self {
+//         self.content = Some(content);
+//         self
+//     }
+
+//     pub fn tags(mut self, tags: Vec<String>) -> Self {
+//         self.tags = Some(tags);
+//         self
+//     }
+
+//     pub fn build(self) -> Entry {
+//         Entry {
+//             id: self.id.expect("id is required"),
+//             timestamp: Utc::now(),
+//             date: Utc::now().naive_utc().date(),
+//             body: self.content.expect("content is required"),
+//             tags: self.tags.unwrap_or_default(),
+//         }
+//     }
+// }
 
 pub struct Journal {
     path: PathBuf,
@@ -79,11 +95,11 @@ impl Journal {
         &self.entries
     }
 
-    pub fn add_entry(&mut self, content: String) -> Entry {
-        let next_id = self.entries.len();
-        let entry = Entry::builder().id(next_id).content(content).build();
-        self.entries.push(entry.clone());
-        entry
+    pub fn add_entry(&mut self, entry: Entry) {
+        let id = self.entries.len();
+        let entry = Entry { id, ..entry };
+
+        self.entries.push(entry);
     }
 
     pub fn remove_entry(&mut self, id: usize) -> Option<Entry> {
@@ -99,9 +115,8 @@ impl Journal {
             let old_body = entry.body.clone();
             entry.body = new_body.to_string();
             Some(Entry {
-                id: entry.id,
-                timestamp: entry.timestamp,
                 body: old_body,
+                ..entry.clone()
             })
         } else {
             None
@@ -114,5 +129,9 @@ impl Journal {
 
     pub fn get_entries(&self) -> &[Entry] {
         &self.entries
+    }
+
+    pub fn next_id(&self) -> usize {
+        self.entries.len()
     }
 }

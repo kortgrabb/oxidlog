@@ -11,11 +11,26 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Init,
-    Add { entry: String },
-    Remove { id: usize },
-    View,
-    Edit { id: usize },
-    Search { query: String },
+    Add {
+        entry: String,
+    },
+    Remove {
+        id: usize,
+    },
+    View {
+        #[clap(short, long)]
+        id: Option<usize>,
+        #[clap(short, long)]
+        from: Option<String>,
+        #[clap(short, long)]
+        to: Option<String>,
+    },
+    Edit {
+        id: usize,
+    },
+    Search {
+        query: String,
+    },
 }
 
 pub fn run() -> JotResult<()> {
@@ -26,7 +41,7 @@ pub fn run() -> JotResult<()> {
         Commands::Init => commands::init::execute(),
         Commands::Add { entry } => commands::add::execute(&mut journal, entry),
         Commands::Remove { id } => commands::remove::execute(&mut journal, id),
-        Commands::View => commands::view::execute(&journal),
+        Commands::View { id, from, to } => commands::view::execute(&journal, id, from, to),
         Commands::Edit { id } => commands::edit::execute(&mut journal, id),
         Commands::Search { query } => commands::search::execute(&journal, &query),
     }
