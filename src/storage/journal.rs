@@ -16,9 +16,9 @@ impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "[{}] {}: {}",
+            "[{}] {}\n{}\n",
             self.id,
-            self.timestamp.format("%Y-%m-%d %H:%M:%S"),
+            self.timestamp.format("%Y-%m-%d"),
             self.body
         )
     }
