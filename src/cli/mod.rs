@@ -16,6 +16,9 @@ enum Commands {
     },
     Remove {
         id: usize,
+        from: Option<String>,
+        #[clap(short, long)]
+        to: Option<String>,
     },
     View {
         #[clap(short, long)]
@@ -30,6 +33,8 @@ enum Commands {
     },
     Search {
         query: String,
+        #[clap(short, long, num_args = 1.., value_delimiter = ' ')]
+        tags: Vec<String>,
     },
 }
 
@@ -40,9 +45,9 @@ pub fn run() -> JotResult<()> {
     match cli.command {
         Commands::Init => commands::init::execute(),
         Commands::Add { entry } => commands::add::execute(&mut journal, entry),
-        Commands::Remove { id } => commands::remove::execute(&mut journal, id),
+        Commands::Remove { id, from, to } => commands::remove::execute(&mut journal, id),
         Commands::View { id, from, to } => commands::view::execute(&journal, id, from, to),
         Commands::Edit { id } => commands::edit::execute(&mut journal, id),
-        Commands::Search { query } => commands::search::execute(&journal, &query),
+        Commands::Search { query, tags } => commands::search::execute(&journal, &query, tags),
     }
 }
