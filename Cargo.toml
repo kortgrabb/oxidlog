@@ -19,5 +19,5 @@ colored = "2.1.0"
 tempfile = "3.13.0"
 
 [[bin]]
-name = "jot-cli"
+name = "jot"
 path = "src/main.rs"
