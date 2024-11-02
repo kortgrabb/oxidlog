@@ -15,26 +15,22 @@ pub struct Entry {
 
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let id = format!("[{}]", self.id).blue();
-        let date = self.timestamp.format("%Y-%m-%d").to_string().yellow();
+        let header = format!(
+            "{} {} {}",
+            format!("[{}]", self.id).blue(),
+            self.timestamp.format("%Y-%m-%d").to_string().yellow(),
+            self.tags
+                .iter()
+                .map(|t| t.green().to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
 
-        writeln!(f, "{} {}", id, date)?;
+        let body = self.tags.iter().fold(self.body.clone(), |acc, tag| {
+            acc.replace(tag, &tag.green().to_string())
+        });
 
-        // Colorize tags
-        let body = self
-            .body
-            .split_whitespace()
-            .map(|word| {
-                if word.starts_with('#') {
-                    word.green().to_string()
-                } else {
-                    word.to_string()
-                }
-            })
-            .collect::<Vec<_>>()
-            .join(" ");
-
-        writeln!(f, "{}", body)
+        write!(f, "{}\n{}\n", header, body)
     }
 }
 
