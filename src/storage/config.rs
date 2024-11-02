@@ -16,10 +16,14 @@ impl Config {
 pub struct JournalConfig {
     #[serde(default = "default_journal_dir")]
     path: String,
-    #[serde(default)]
+    #[serde(default = "default_true")]
     pub add_tags_to_body: bool,
-    #[serde(default)]
+    #[serde(default = "default_true")]
     pub show_time: bool,
+}
+// HACK: serde doesn't support default values for bools
+fn default_true() -> bool {
+    true
 }
 
 fn default_journal_dir() -> String {
