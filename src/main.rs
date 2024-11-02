@@ -5,8 +5,11 @@ mod storage;
 mod utils;
 
 fn main() {
-    if let Err(e) = cli::run() {
-        eprintln!("Error: {}", e);
-        std::process::exit(1);
+    match cli::run() {
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1);
+        }
     }
 }

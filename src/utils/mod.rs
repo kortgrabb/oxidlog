@@ -8,7 +8,7 @@ pub fn get_input(prompt: &str) -> String {
     input.trim().to_string()
 }
 
-pub fn matches_tags(tags: &[String], entry_tags: &[String]) -> bool {
+pub fn do_tags_match(tags: &[String], entry_tags: &[String]) -> bool {
     if tags.is_empty() {
         return true;
     }

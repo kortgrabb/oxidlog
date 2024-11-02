@@ -11,3 +11,4 @@ thiserror = "*"
 dirs = "*"
 clap = { version = "*", features = ["derive"] }
 tempfile = "3.13.0"
+colored = "*"

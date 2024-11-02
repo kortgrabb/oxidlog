@@ -32,7 +32,7 @@ pub fn execute(
                         return false;
                     }
                 }
-                utils::matches_tags(&e.tags, &tags)
+                utils::do_tags_match(&tags, &e.tags)
             })
             .collect::<Vec<_>>();
 

@@ -12,7 +12,7 @@ pub fn execute(journal: &Journal, query: &str, tags: Vec<String>) -> JotResult<(
             .iter()
             .filter(|e| {
                 let content_matches = e.body.to_lowercase().contains(&term);
-                utils::matches_tags(&tags, &e.tags) && content_matches
+                utils::do_tags_match(&tags, &e.tags) && content_matches
             })
             .map(|e| format!("{}", e))
             .collect();

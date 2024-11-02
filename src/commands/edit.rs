@@ -3,6 +3,7 @@ use crate::{
     storage::{self, Journal},
     utils,
 };
+use colored::Colorize;
 
 pub fn execute(journal: &mut Journal, id: usize) -> JotResult<()> {
     match journal.get_entry(id) {
@@ -13,7 +14,7 @@ pub fn execute(journal: &mut Journal, id: usize) -> JotResult<()> {
             journal.edit_entry(id, &new_body);
             storage::save_journal(journal)?;
 
-            println!("Entry updated");
+            println!("{}", "Entry updated!".green());
 
             Ok(())
         }

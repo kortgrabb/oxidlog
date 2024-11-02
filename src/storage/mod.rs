@@ -6,7 +6,7 @@ use std::path::PathBuf;
 pub use journal::{Entry, Journal};
 
 // TODO: add config
-const DEFAULT_JOURNAL_DIR: &str = ".journal";
+const DEFAULT_JOURNAL_DIR: &str = ".jot";
 const DEFAULT_JOURNAL_SAVE_FILE: &str = "journal.json";
 
 pub fn load_journal() -> std::io::Result<Journal> {
@@ -29,6 +29,12 @@ pub fn load_from_path(path: PathBuf) -> std::io::Result<Journal> {
 pub fn save_journal(journal: &Journal) -> std::io::Result<()> {
     let serialized_entries = serde_json::to_string(journal.entries())
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+
+    if !journal.path().exists() {
+        eprintln!("Journal is not initialized. Run 'jot init' first.");
+        std::process::exit(1);
+    }
+
     fs::write(journal.path(), serialized_entries)
 }
 

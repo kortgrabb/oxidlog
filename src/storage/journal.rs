@@ -1,4 +1,5 @@
 use chrono::{DateTime, NaiveDate, Utc};
+use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
@@ -14,13 +15,26 @@ pub struct Entry {
 
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "[{}] {}\n{}\n",
-            self.id,
-            self.timestamp.format("%Y-%m-%d"),
-            self.body
-        )
+        let id = format!("[{}]", self.id).blue();
+        let date = self.timestamp.format("%Y-%m-%d").to_string().yellow();
+
+        writeln!(f, "{} {}", id, date)?;
+
+        // Colorize tags
+        let body = self
+            .body
+            .split_whitespace()
+            .map(|word| {
+                if word.starts_with('#') {
+                    word.green().to_string()
+                } else {
+                    word.to_string()
+                }
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        writeln!(f, "{}", body)
     }
 }
 
