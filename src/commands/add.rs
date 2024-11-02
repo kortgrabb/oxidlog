@@ -22,5 +22,6 @@ pub fn execute(journal: &mut Journal, content: String) -> JotResult<()> {
         "Entry #{} added!",
         (journal.next_id() - 1).to_string().green()
     );
+
     Ok(())
 }

@@ -7,7 +7,6 @@ pub fn execute(
     to: Option<String>,
     tags: Vec<String>,
 ) -> JotResult<()> {
-    // dbg!(&tags);
     if let Some(id) = id {
         if let Some(entry) = journal.entries().iter().find(|e| e.id == id) {
             println!("{}", entry);

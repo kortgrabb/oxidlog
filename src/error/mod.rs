@@ -13,7 +13,7 @@ pub enum JotError {
     #[error("Failed to edit entry: {0}")]
     EditError(String),
 
-    #[error("IO error: {0}")]
+    #[error("Failed to save journal: {0}")]
     IoError(#[from] std::io::Error),
 
     #[error("Serde error: {0}")]

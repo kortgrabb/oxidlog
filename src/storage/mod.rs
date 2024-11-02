@@ -1,7 +1,7 @@
 mod journal;
 
-use std::fs;
 use std::path::PathBuf;
+use std::{fs, process};
 
 pub use journal::{Entry, Journal};
 
@@ -10,34 +10,36 @@ const DEFAULT_JOURNAL_DIR: &str = ".jot";
 const DEFAULT_JOURNAL_SAVE_FILE: &str = "journal.json";
 
 pub fn load_journal() -> std::io::Result<Journal> {
-    let path = get_journal_path().unwrap();
+    let path = get_journal_path().unwrap_or(PathBuf::from(DEFAULT_JOURNAL_SAVE_FILE));
     load_from_path(path)
 }
 
 pub fn load_from_path(path: PathBuf) -> std::io::Result<Journal> {
     match fs::read_to_string(&path) {
         Ok(content) => {
-            let entries: Vec<Entry> = serde_json::from_str(&content)
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+            let entries: Vec<Entry> = serde_json::from_str(&content)?;
             Ok(Journal::from_entries(path, entries))
         }
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(Journal::new(path)),
-        Err(e) => Err(e),
+        Err(_) => Ok(Journal::new(path)), // Return an empty journal if the file doesn't exist
     }
 }
 
 pub fn save_journal(journal: &Journal) -> std::io::Result<()> {
-    let serialized_entries = serde_json::to_string(journal.entries())
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
-
-    if !journal.path().exists() {
-        eprintln!("Journal is not initialized. Run 'jot init' first.");
-        std::process::exit(1);
+    let serialized_entries = serde_json::to_string(journal.entries())?;
+    match fs::write(journal.path(), serialized_entries) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                eprintln!("Journal could not be found, create one with `jot init`");
+            } else {
+                eprintln!("Error saving journal: {}", e);
+            }
+            process::exit(1);
+        }
     }
-
-    fs::write(journal.path(), serialized_entries)
 }
 
+/// Get the directory where the journal is stored
 pub fn get_journal_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mut path;
     if cfg!(debug_assertions) {
@@ -50,6 +52,7 @@ pub fn get_journal_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(path)
 }
 
+/// Get the path to the journal file
 pub fn get_journal_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mut path = get_journal_dir()?;
     path.push(DEFAULT_JOURNAL_SAVE_FILE);
