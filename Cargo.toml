@@ -1,5 +1,5 @@
 [package]
-name = "jot2"
+name = "jot"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,5 +11,11 @@ toml = "*"
 thiserror = "*"
 dirs = "*"
 clap = { version = "*", features = ["derive"] }
-tempfile = "3.13.0"
 colored = "*"
+
+[dev-dependencies]
+tempfile = "*"
+
+[[bin]]
+name = "jot-cli"
+path = "src/main.rs"

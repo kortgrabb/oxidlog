@@ -1,4 +1,4 @@
 [journal_cfg]
 path = ""
-tags_in_body = true
-show_time = true
+add_tags_to_body = false
+show_time = false
