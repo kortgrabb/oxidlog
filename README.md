@@ -45,6 +45,14 @@ Find specific entries using keywords
 xlog search "meeting" --tags "important"
 ```
 
-## Getting Started
+## Learn more
+Use the 'help' command to explore all available options
+```bash
+xlog help
+```
+Or view all options for a specific command
+```bash
+xlog help add
+```
 
-Run `xlog help` to see available commands or check our documentation [COMING SOON].
+For more information, visit the documentation at [COMING SOON];
