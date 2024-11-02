@@ -46,7 +46,7 @@ pub fn save_journal(journal: &Journal) -> std::io::Result<()> {
         Ok(_) => Ok(()),
         Err(e) => {
             if e.kind() == std::io::ErrorKind::NotFound {
-                eprintln!("Journal could not be found, create one with `jot init`");
+                eprintln!("Journal could not be found, create one with `xlog init`");
             } else {
                 eprintln!("Error saving journal: {}", e);
             }
