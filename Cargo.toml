@@ -6,17 +6,17 @@ description = "A command-line note-taking application"
 license = "MIT"
 
 [dependencies]
-chrono = { version = "*", features = ["serde"] }
-serde = { version = "*", features = ["derive"] }
-serde_json = "*"
-toml = "*"
-thiserror = "*"
-dirs = "*"
-clap = { version = "*", features = ["derive"] }
-colored = "*"
+chrono = { version = "0.4.38", features = ["serde"] }
+serde = { version = "1.0.214", features = ["derive"] }
+serde_json = "1.0.132"
+toml = "0.8.19"
+thiserror = "1.0.66"
+dirs = "5.0.1"
+clap = { version = "4.5.20", features = ["derive"] }
+colored = "2.1.0"
 
 [dev-dependencies]
-tempfile = "*"
+tempfile = "3.13.0"
 
 [[bin]]
 name = "jot-cli"
