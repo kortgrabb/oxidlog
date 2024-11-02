@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A command-line note-taking application"
 license = "MIT"
-repository = "github.com/kortgrabb/jot-cli"
+repository = "https://github.com/kortgrabb/jot-cli"
 
 [dependencies]
 chrono = { version = "0.4.38", features = ["serde"] }
