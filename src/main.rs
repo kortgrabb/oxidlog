@@ -15,8 +15,6 @@ fn main() {
         }
     };
 
-    println!("Config: {:?}", config.journal_cfg.tags_in_body);
-
     match cli::run(&config) {
         Ok(_) => {}
         Err(e) => {

@@ -17,7 +17,9 @@ pub struct JournalConfig {
     #[serde(default = "default_journal_dir")]
     path: String,
     #[serde(default)]
-    pub tags_in_body: bool,
+    pub add_tags_to_body: bool,
+    #[serde(default)]
+    pub show_time: bool,
 }
 
 fn default_journal_dir() -> String {

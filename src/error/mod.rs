@@ -2,7 +2,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum JotError {
     #[error("Failed to initialize jot: {0}")]
-    InitError(String),
+    _InitError(String),
 
     #[error("Failed to add entry: {0}")]
     AddError(String),

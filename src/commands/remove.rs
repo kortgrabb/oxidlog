@@ -8,8 +8,8 @@ use crate::{
 pub fn execute(
     journal: &mut Journal,
     id: usize,
-    from: Option<String>,
-    to: Option<String>,
+    _from: Option<String>,
+    _to: Option<String>,
 ) -> JotResult<()> {
     match journal.remove_entry(id) {
         Some(_) => match storage::save_journal(journal) {

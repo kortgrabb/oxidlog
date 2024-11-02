@@ -1,3 +1,4 @@
 [journal_cfg]
 path = ""
 tags_in_body = true
+show_time = true

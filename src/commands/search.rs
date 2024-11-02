@@ -1,6 +1,5 @@
 use crate::{error::JotResult, storage::Journal, utils};
 
-// TODO: search by tags
 pub fn execute(journal: &Journal, query: &str, tags: Vec<String>) -> JotResult<()> {
     let term = query.to_lowercase();
     let entries = journal.get_entries();

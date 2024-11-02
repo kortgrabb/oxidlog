@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
 
-use super::config::Config;
+use crate::storage::load_config;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Entry {
@@ -16,23 +16,43 @@ pub struct Entry {
 }
 
 impl fmt::Display for Entry {
+    // TODO: add extensive formatting configuration
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let header = format!(
-            "{} {} {}",
-            format!("[{}]", self.id).blue(),
-            self.timestamp.format("%Y-%m-%d").to_string().yellow(),
-            self.tags
-                .iter()
-                .map(|t| t.green().to_string())
-                .collect::<Vec<_>>()
-                .join(" ")
-        );
+        let config = load_config().unwrap_or_default();
 
+        let mut date = self.timestamp.format("%Y-%m-%d").to_string();
+        if config.journal_cfg.show_time {
+            date = format!(
+                "{} {}",
+                self.timestamp.format("%Y-%m-%d").to_string().bright_black(),
+                self.timestamp
+                    .format("%H:%M")
+                    .to_string()
+                    .underline()
+                    .bright_black()
+            );
+        }
+
+        // Make the ID more prominent with bold
+        let id_str = format!("[{}]", self.id).cyan().bold();
+
+        // Style tags with a more subtle look
+        let tags_str = self
+            .tags
+            .iter()
+            .map(|t| t.on_blue().black().to_string())
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        let header = format!("{} {} {}", id_str, date, tags_str);
+
+        // Highlight tag mentions in the body with a more subtle style
         let body = self.tags.iter().fold(self.body.clone(), |acc, tag| {
-            acc.replace(tag, &tag.green().to_string())
+            acc.replace(tag, &tag.to_string().bright_blue().to_string())
         });
 
-        write!(f, "{}\n{}\n", header, body)
+        // Add a separator line between entries
+        write!(f, "{}\n{}\n{}", header, body, "─".repeat(40).bright_black())
     }
 }
 

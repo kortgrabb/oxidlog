@@ -15,7 +15,7 @@ pub fn execute(journal: &mut Journal, content: String, config: &Config) -> JotRe
         return Err(JotError::AddError("Entry cannot be empty".to_string()));
     }
 
-    if !config.journal_cfg.tags_in_body {
+    if !config.journal_cfg.add_tags_to_body {
         body = content
             .split_whitespace()
             .filter(|word| !word.starts_with('#'))
