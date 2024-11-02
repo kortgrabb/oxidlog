@@ -1,4 +1,8 @@
-use crate::{error::JotResult, storage::Journal, utils};
+use crate::{
+    error::JotResult,
+    storage::{config::Config, Journal},
+    utils,
+};
 
 pub fn execute(
     journal: &Journal,

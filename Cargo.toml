@@ -7,6 +7,7 @@ edition = "2021"
 chrono = { version = "*", features = ["serde"] }
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+toml = "*"
 thiserror = "*"
 dirs = "*"
 clap = { version = "*", features = ["derive"] }

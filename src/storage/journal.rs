@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
 
+use super::config::Config;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Entry {
     pub id: usize,

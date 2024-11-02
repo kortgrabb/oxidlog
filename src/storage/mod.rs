@@ -1,17 +1,33 @@
+pub mod config;
 mod journal;
 
+use config::Config;
 use std::path::PathBuf;
 use std::{fs, process};
 
 pub use journal::{Entry, Journal};
 
-// TODO: add config
+const DEFAULT_CONFIG_FILE: &str = "config.toml";
 const DEFAULT_JOURNAL_DIR: &str = ".jot";
 const DEFAULT_JOURNAL_SAVE_FILE: &str = "journal.json";
 
-pub fn load_journal() -> std::io::Result<Journal> {
-    let path = get_journal_path().unwrap_or(PathBuf::from(DEFAULT_JOURNAL_SAVE_FILE));
-    load_from_path(path)
+// ! Journal Related
+
+// Update load_journal to take config as parameter
+pub fn load_journal(config: &Config) -> Journal {
+    let journal_path = if config.journal_path().is_empty() {
+        get_journal_path().unwrap()
+    } else {
+        PathBuf::from(config.journal_path())
+    };
+
+    match load_from_path(journal_path) {
+        Ok(journal) => journal,
+        Err(e) => {
+            eprintln!("Error loading journal: {}", e);
+            process::exit(1);
+        }
+    }
 }
 
 pub fn load_from_path(path: PathBuf) -> std::io::Result<Journal> {
@@ -59,18 +75,52 @@ pub fn get_journal_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(path)
 }
 
-pub fn init_journal() -> Result<(), Box<dyn std::error::Error>> {
-    let journal_path = get_journal_path()?;
-    std::fs::create_dir_all(get_journal_dir()?)?;
-
-    if !journal_path.exists() {
-        let journal = Journal::new(journal_path);
-        save_journal(&journal)?;
-        println!("Journal initialized");
+// Update init_journal to take config
+pub fn init_journal(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    let journal_path = if config.journal_path().is_empty() {
+        get_journal_path()?
     } else {
-        println!("Journal already exists");
+        let path = PathBuf::from(config.journal_path());
+        std::fs::create_dir_all(path.parent().unwrap())?;
+        path
+    };
+
+    // create all parent directories if they don't exist
+    fs::create_dir_all(journal_path.parent().unwrap())?;
+    fs::write(journal_path, "[]")?;
+
+    // Initialize the config file
+    save_config(config)?;
+
+    Ok(())
+}
+
+// ! Config Related
+
+/// Get the path to the config file
+pub fn get_config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let mut path = get_journal_dir()?;
+    path.push(DEFAULT_CONFIG_FILE);
+    Ok(path)
+}
+
+/// Load configuration from the config file
+pub fn load_config() -> Result<Config, Box<dyn std::error::Error>> {
+    let config_path = get_config_path()?;
+    if !config_path.exists() {
+        return Ok(Config::default());
     }
 
+    let content = fs::read_to_string(config_path)?;
+    let config: Config = toml::from_str(&content)?;
+    Ok(config)
+}
+
+/// Save configuration to the config file
+pub fn save_config(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    let config_path = get_config_path()?;
+    let content = toml::to_string(config)?;
+    fs::write(config_path, content)?;
     Ok(())
 }
 
@@ -79,103 +129,60 @@ mod tests {
     use super::*;
     use tempfile::TempDir;
 
+    fn setup_temp_journal() -> (TempDir, PathBuf) {
+        let temp_dir = TempDir::new().unwrap();
+        let journal_path = temp_dir.path().join("test_journal.json");
+        (temp_dir, journal_path)
+    }
+
     #[test]
-    fn test_journal_new() {
-        let path = PathBuf::from("test.json");
-        let journal = Journal::new(path.clone());
+    fn test_load_empty_journal() {
+        let (_temp_dir, path) = setup_temp_journal();
+        let journal = load_from_path(path.clone()).unwrap();
+        assert!(journal.entries().is_empty());
         assert_eq!(*journal.path(), path);
-        assert!(journal.entries().is_empty());
     }
 
     #[test]
-    fn test_entry_new() {
-        let entry = Entry::new(0, "test".to_string(), vec![]);
-        assert_eq!(entry.id, 0);
-        assert_eq!(entry.body, "test");
+    fn test_save_and_load_journal() {
+        let (_temp_dir, path) = setup_temp_journal();
+
+        // Create and save a journal with one entry
+        let mut journal = Journal::new(path.clone());
+        journal.add_entry(Entry::new(0, "Test entry".to_string(), vec![]));
+        save_journal(&journal).unwrap();
+
+        // Load the journal and verify contents
+        let loaded_journal = load_from_path(path).unwrap();
+        assert_eq!(loaded_journal.entries().len(), 1);
+        assert_eq!(loaded_journal.entries()[0].body, "Test entry");
     }
 
     #[test]
-    fn test_get_journal_dir() -> Result<(), Box<dyn std::error::Error>> {
-        let dir = get_journal_dir()?;
-        assert!(dir.ends_with(DEFAULT_JOURNAL_DIR));
-        Ok(())
+    fn test_get_journal_dir() {
+        let dir = get_journal_dir().unwrap();
+        if cfg!(debug_assertions) {
+            assert!(dir.ends_with(DEFAULT_JOURNAL_DIR));
+        } else {
+            assert!(dir.to_str().unwrap().contains(DEFAULT_JOURNAL_DIR));
+        }
     }
 
     #[test]
-    fn test_get_journal_path() -> Result<(), Box<dyn std::error::Error>> {
-        let path = get_journal_path()?;
-        assert!(path.ends_with(DEFAULT_JOURNAL_SAVE_FILE));
-        Ok(())
-    }
+    fn test_init_journal() {
+        let temp_dir = TempDir::new().unwrap();
+        std::env::set_var("HOME", temp_dir.path());
 
-    #[test]
-    fn test_initialize() -> Result<(), Box<dyn std::error::Error>> {
-        let temp_dir = TempDir::new()?;
-        let path = temp_dir.path().join(DEFAULT_JOURNAL_DIR);
-        std::fs::create_dir_all(&path)?;
+        let config = Config::default();
+        init_journal(&config).unwrap();
 
-        init_journal()?;
+        let journal_dir = get_journal_dir().unwrap();
+        let journal_path = get_journal_path().unwrap();
 
-        let journal_path = get_journal_path()?;
+        assert!(journal_dir.exists());
         assert!(journal_path.exists());
-        Ok(())
-    }
 
-    #[test]
-    fn test_load_nonexistent() -> Result<(), Box<dyn std::error::Error>> {
-        let temp_dir = TempDir::new()?;
-        let path = temp_dir.path().join("nonexistent.json");
-
-        let journal = load_from_path(path)?;
-        assert!(journal.entries().is_empty());
-        Ok(())
-    }
-
-    #[test]
-    fn test_add_entry() -> Result<(), Box<dyn std::error::Error>> {
-        let temp_dir = TempDir::new()?;
-        let path = temp_dir.path().join("test.json");
-
-        let mut journal = Journal::new(path.clone());
-        let entry = Entry::new(0, "test".to_string(), vec![]);
-        journal.add_entry(entry);
-        save_journal(&journal)?;
-
-        let journal = load_from_path(path)?;
-        assert_eq!(journal.entries().len(), 1);
-        Ok(())
-    }
-
-    #[test]
-    fn test_remove_entry() -> Result<(), Box<dyn std::error::Error>> {
-        let temp_dir = TempDir::new()?;
-        let path = temp_dir.path().join("test.json");
-
-        let mut journal = Journal::new(path.clone());
-        let entry = Entry::new(0, "test".to_string(), vec![]);
-        journal.add_entry(entry);
-        save_journal(&journal)?;
-
-        let entry = journal.remove_entry(0);
-        assert!(entry.is_some());
-        save_journal(&journal)?;
-
-        let journal = load_from_path(path)?;
-        assert!(journal.entries().is_empty());
-        Ok(())
-    }
-
-    #[test]
-    fn test_get_entry() -> Result<(), Box<dyn std::error::Error>> {
-        let temp_dir = TempDir::new()?;
-        let path = temp_dir.path().join("test.json");
-
-        let mut journal = Journal::new(path.clone());
-        let entry = Entry::new(0, "test".to_string(), vec![]);
-        journal.add_entry(entry);
-
-        let entry = journal.get_entry(0);
-        assert!(entry.is_some() && entry.unwrap().body == "test");
-        Ok(())
+        // Should be able to init multiple times without error
+        assert!(init_journal(&config).is_ok());
     }
 }

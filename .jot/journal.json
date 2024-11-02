@@ -1,1 +1,27 @@
-[{"id":2,"timestamp":"2024-11-02T08:13:16.668053105Z","date":"2024-11-02","body":"#todo #school study physics","tags":["todo","school"]}]
+[
+    {
+        "id": 0,
+        "timestamp": "2024-11-02T10:34:36.932496415Z",
+        "date": "2024-11-02",
+        "body": "hello there",
+        "tags": []
+    },
+    {
+        "id": 1,
+        "timestamp": "2024-11-02T10:34:45.349798307Z",
+        "date": "2024-11-02",
+        "body": "eat pp",
+        "tags": [
+            "todo"
+        ]
+    },
+    {
+        "id": 2,
+        "timestamp": "2024-11-02T10:35:06.124473191Z",
+        "date": "2024-11-02",
+        "body": "#todo eat pp2",
+        "tags": [
+            "todo"
+        ]
+    }
+]

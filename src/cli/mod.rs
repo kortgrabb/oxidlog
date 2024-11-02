@@ -1,4 +1,5 @@
 use crate::error::JotResult;
+use crate::storage::config::Config;
 use crate::{commands, storage};
 use clap::{Parser, Subcommand};
 
@@ -40,13 +41,13 @@ enum Commands {
     },
 }
 
-pub fn run() -> JotResult<()> {
+pub fn run(config: &Config) -> JotResult<()> {
     let cli = Cli::parse();
-    let mut journal = storage::load_journal()?;
+    let mut journal = storage::load_journal(config);
 
     match cli.command {
-        Commands::Init => commands::init::execute(),
-        Commands::Add { entry } => commands::add::execute(&mut journal, entry),
+        Commands::Init => commands::init::execute(config),
+        Commands::Add { entry } => commands::add::execute(&mut journal, entry, config),
         Commands::Remove { id, from, to } => commands::remove::execute(&mut journal, id, from, to),
         Commands::View { id, from, to, tags } => {
             commands::view::execute(&journal, id, from, to, tags)
