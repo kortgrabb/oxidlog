@@ -16,43 +16,57 @@ pub struct Entry {
 }
 
 impl fmt::Display for Entry {
-    // TODO: add extensive formatting configuration
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let config = load_config().unwrap_or_default();
 
-        let mut date = self.timestamp.format("%Y-%m-%d").to_string();
-        if config.journal_cfg.show_time {
-            date = format!(
+        // Format date and time
+        let date_time = if config.journal_cfg.show_time {
+            format!(
                 "{} {}",
                 self.timestamp.format("%Y-%m-%d").to_string().bright_black(),
-                self.timestamp
-                    .format("%H:%M")
-                    .to_string()
-                    .underline()
-                    .bright_black()
-            );
-        }
+                self.timestamp.format("%H:%M").to_string().bright_black()
+            )
+        } else {
+            self.timestamp.format("%Y-%m-%d").to_string().bright_black().to_string()
+        };
 
-        // Make the ID more prominent with bold
-        let id_str = format!("[{}]", self.id).cyan().bold();
+        // Format ID with a fixed width for better alignment
+        let id_str = format!("[{:>3}]", self.id).cyan().bold();
 
-        // Style tags with a more subtle look
-        let tags_str = self
-            .tags
-            .iter()
-            .map(|t| t.on_blue().black().to_string())
-            .collect::<Vec<_>>()
-            .join(" ");
+        // Format tags with a more modern look
+        let tags_str = if !self.tags.is_empty() {
+            self.tags
+                .iter()
+                .map(|t| format!("#{}", t).bright_blue().to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        } else {
+            String::new()
+        };
 
-        let header = format!("{} {} {}", id_str, date, tags_str);
+        // Create the header with proper spacing
+        let header = if tags_str.is_empty() {
+            format!("{} {}", id_str, date_time)
+        } else {
+            format!("{} {} {}", id_str, date_time, tags_str)
+        };
 
-        // Highlight tag mentions in the body with a more subtle style
-        let body = self.tags.iter().fold(self.body.clone(), |acc, tag| {
-            acc.replace(tag, &tag.to_string().bright_blue().to_string())
+        // Process the body: highlight tag mentions and add proper indentation
+        let processed_body = self.tags.iter().fold(self.body.clone(), |acc, tag| {
+            acc.replace(&format!("#{}", tag), &format!("#{}", tag).bright_blue())
         });
 
-        // Add a separator line between entries
-        write!(f, "{}\n{}\n{}", header, body, "─".repeat(40).bright_black())
+        // Add a subtle separator line
+        let separator = "─".repeat(50).bright_black();
+
+        // Combine all elements with proper spacing
+        write!(
+            f,
+            "{}\n{}\n{}",
+            header,
+            processed_body.trim(),
+            separator
+        )
     }
 }
 

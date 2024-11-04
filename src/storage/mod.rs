@@ -7,9 +7,9 @@ use std::{fs, process};
 
 pub use journal::{Entry, Journal};
 
-const DEFAULT_CONFIG_FILE: &str = "config.toml";
-const DEFAULT_JOURNAL_DIR: &str = ".jot";
-const DEFAULT_JOURNAL_SAVE_FILE: &str = "journal.json";
+const CONFIG_FILE: &str = "config.toml";
+const JOURNAL_DIR: &str = ".oxidlog";
+const JOURNAL_FILE: &str = "journal.json";
 
 // ! Journal Related
 
@@ -64,14 +64,14 @@ pub fn get_journal_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {
         path = dirs::home_dir().ok_or("Could not find home directory")?;
     }
 
-    path.push(DEFAULT_JOURNAL_DIR);
+    path.push(JOURNAL_DIR);
     Ok(path)
 }
 
 /// Get the path to the journal file
 pub fn get_journal_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mut path = get_journal_dir()?;
-    path.push(DEFAULT_JOURNAL_SAVE_FILE);
+    path.push(JOURNAL_FILE);
     Ok(path)
 }
 
@@ -100,7 +100,7 @@ pub fn init_journal(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
 /// Get the path to the config file
 pub fn get_config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mut path = get_journal_dir()?;
-    path.push(DEFAULT_CONFIG_FILE);
+    path.push(CONFIG_FILE);
     Ok(path)
 }
 
@@ -162,9 +162,9 @@ mod tests {
     fn test_get_journal_dir() {
         let dir = get_journal_dir().unwrap();
         if cfg!(debug_assertions) {
-            assert!(dir.ends_with(DEFAULT_JOURNAL_DIR));
+            assert!(dir.ends_with(JOURNAL_DIR));
         } else {
-            assert!(dir.to_str().unwrap().contains(DEFAULT_JOURNAL_DIR));
+            assert!(dir.to_str().unwrap().contains(JOURNAL_DIR));
         }
     }
 
