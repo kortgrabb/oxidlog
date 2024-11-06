@@ -1,5 +1,9 @@
 use std::io::{self, Write};
 
+use colored::Colorize;
+
+use crate::storage::Entry;
+
 pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt);
     io::stdout().flush().unwrap();
@@ -23,4 +27,36 @@ pub fn parse_date(date: &str) -> chrono::NaiveDate {
             std::process::exit(1);
         }
     }
+}
+
+pub fn format_entry(entry: &Entry, show_time: bool) -> String {
+    let mut formatted = String::new();
+    formatted.push_str(
+        &format!(
+            "[{:>3}] {}",
+            entry.id,
+            entry.date.format("%Y-%m-%d").to_string().bright_blue()
+        )
+        .to_string(),
+    );
+
+    if show_time {
+        formatted.push_str(&format!(
+            " {}",
+            entry
+                .timestamp
+                .format("%H:%M")
+                .to_string()
+                .dimmed()
+                .underline()
+        ));
+    }
+
+    if !entry.tags.is_empty() {
+        formatted.push_str(&format!(" {}", entry.tags.join(", ").italic().dimmed()));
+    }
+    formatted.push_str(&format!("\n{}\n", entry.body));
+
+    formatted.push_str(&"-".repeat(40));
+    formatted
 }

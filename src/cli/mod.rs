@@ -62,8 +62,8 @@ pub fn run(config: &Config) -> JotResult<()> {
         Commands::Init => commands::init::execute(),
         Commands::Add { entry } => commands::add::execute(&mut journal, entry, config),
         Commands::Remove { args } => commands::remove::execute(&mut journal, args),
-        Commands::View { args } => commands::view::execute(&journal, args),
+        Commands::View { args } => commands::view::execute(&journal, args, config),
         Commands::Edit { id } => commands::edit::execute(&mut journal, id),
-        Commands::Search { args } => commands::search::execute(&journal, args),
+        Commands::Search { args } => commands::search::execute(&journal, args, config),
     }
 }

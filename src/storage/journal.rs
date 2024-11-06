@@ -15,61 +15,6 @@ pub struct Entry {
     pub tags: Vec<String>,
 }
 
-impl fmt::Display for Entry {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let config = load_config().unwrap_or_default();
-
-        // Format date and time
-        let date_time = if config.journal_cfg.show_time {
-            format!(
-                "{} {}",
-                self.timestamp.format("%Y-%m-%d").to_string().bright_black(),
-                self.timestamp.format("%H:%M").to_string().bright_black()
-            )
-        } else {
-            self.timestamp.format("%Y-%m-%d").to_string().bright_black().to_string()
-        };
-
-        // Format ID with a fixed width for better alignment
-        let id_str = format!("[{:>3}]", self.id).cyan().bold();
-
-        // Format tags with a more modern look
-        let tags_str = if !self.tags.is_empty() {
-            self.tags
-                .iter()
-                .map(|t| format!("#{}", t).bright_blue().to_string())
-                .collect::<Vec<_>>()
-                .join(" ")
-        } else {
-            String::new()
-        };
-
-        // Create the header with proper spacing
-        let header = if tags_str.is_empty() {
-            format!("{} {}", id_str, date_time)
-        } else {
-            format!("{} {} {}", id_str, date_time, tags_str)
-        };
-
-        // Process the body: highlight tag mentions and add proper indentation
-        let processed_body = self.tags.iter().fold(self.body.clone(), |acc, tag| {
-            acc.replace(&format!("#{}", tag), &format!("#{}", tag).bright_blue())
-        });
-
-        // Add a subtle separator line
-        let separator = "─".repeat(50).bright_black();
-
-        // Combine all elements with proper spacing
-        write!(
-            f,
-            "{}\n{}\n{}",
-            header,
-            processed_body.trim(),
-            separator
-        )
-    }
-}
-
 impl Entry {
     pub fn new(id: usize, body: String, tags: Vec<String>) -> Self {
         Self {

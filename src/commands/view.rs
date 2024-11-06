@@ -1,14 +1,17 @@
-use crate::{cli::ViewArgs, error::JotResult, storage::Journal, utils};
+use crate::{
+    cli::ViewArgs,
+    error::JotResult,
+    storage::{config::Config, Journal},
+    utils,
+};
 
-pub fn execute(
-    journal: &Journal,
-    args: ViewArgs, 
-) -> JotResult<()> {
+pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<()> {
     if let Some(id) = args.id {
         if let Some(entry) = journal.entries().iter().find(|e| e.id == id) {
             println!("ID: {}", entry.id);
             println!("Date: {}", entry.date);
             println!("Body: {}", entry.body);
+            println!("Tags: {}", entry.tags.join(", "));
         } else {
             println!("Entry with id {id} not found");
         }
@@ -38,7 +41,9 @@ pub fn execute(
             println!("No entries found.");
         } else {
             println!("{} entries found", entries.len());
-            entries.iter().for_each(|e| println!("{}", e));
+            entries.iter().for_each(|e| {
+                println!("{}", utils::format_entry(e, config.journal_cfg.show_time,))
+            });
         }
     }
 
