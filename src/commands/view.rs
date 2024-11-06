@@ -1,37 +1,36 @@
-use crate::{error::JotResult, storage::Journal, utils};
+use crate::{cli::ViewArgs, error::JotResult, storage::Journal, utils};
 
 pub fn execute(
     journal: &Journal,
-    id: Option<usize>,
-    from: Option<String>,
-    to: Option<String>,
-    tags: Vec<String>,
+    args: ViewArgs, 
 ) -> JotResult<()> {
-    if let Some(id) = id {
+    if let Some(id) = args.id {
         if let Some(entry) = journal.entries().iter().find(|e| e.id == id) {
-            println!("{}", entry);
+            println!("ID: {}", entry.id);
+            println!("Date: {}", entry.date);
+            println!("Body: {}", entry.body);
         } else {
-            println!("Entry #{} not found", id);
+            println!("Entry with id {id} not found");
         }
     } else {
-        let entries = journal.get_entries();
-        let entries = entries
+        let entries = journal
+            .get_entries()
             .iter()
             // Filter entries by date and tags
             .filter(|e| {
-                if let Some(from) = &from {
+                if let Some(from) = &args.from {
                     let parsed_date = utils::parse_date(from);
                     if e.date < parsed_date {
                         return false;
                     }
                 }
-                if let Some(to) = &to {
+                if let Some(to) = &args.to {
                     let parsed_date = utils::parse_date(to);
                     if e.date > parsed_date {
                         return false;
                     }
                 }
-                utils::do_tags_match(&tags, &e.tags)
+                utils::do_tags_match(&args.tags, &e.tags)
             })
             .collect::<Vec<_>>();
 

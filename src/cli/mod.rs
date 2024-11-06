@@ -9,6 +9,28 @@ struct Cli {
     command: Commands,
 }
 
+// New argument structs
+#[derive(clap::Args, Clone)]
+pub struct RemoveArgs {
+    pub id: usize,
+    pub from: Option<String>,
+    pub to: Option<String>,
+}
+
+#[derive(clap::Args, Clone)]
+pub struct ViewArgs {
+    pub id: Option<usize>,
+    pub from: Option<String>,
+    pub to: Option<String>,
+    pub tags: Vec<String>,
+}
+
+#[derive(clap::Args, Clone)]
+pub struct SearchArgs {
+    pub query: String,
+    pub tags: Vec<String>,
+}
+
 #[derive(Subcommand)]
 enum Commands {
     Init,
@@ -16,43 +38,32 @@ enum Commands {
         entry: String,
     },
     Remove {
-        id: usize,
-        from: Option<String>,
-        #[clap(short, long)]
-        to: Option<String>,
+        #[clap(flatten)]
+        args: RemoveArgs,
     },
     View {
-        #[clap(short, long)]
-        id: Option<usize>,
-        #[clap(short, long)]
-        from: Option<String>,
-        #[clap(short, long)]
-        to: Option<String>,
-        #[clap(long)]
-        tags: Vec<String>,
+        #[clap(flatten)]
+        args: ViewArgs,
     },
     Edit {
         id: usize,
     },
     Search {
-        query: String,
-        #[clap(short, long, num_args = 1.., value_delimiter = ' ')]
-        tags: Vec<String>,
+        #[clap(flatten)]
+        args: SearchArgs,
     },
 }
 
 pub fn run(config: &Config) -> JotResult<()> {
     let cli = Cli::parse();
-    let mut journal = storage::load_journal(config);
+    let mut journal = storage::load_journal();
 
     match cli.command {
-        Commands::Init => commands::init::execute(config),
+        Commands::Init => commands::init::execute(),
         Commands::Add { entry } => commands::add::execute(&mut journal, entry, config),
-        Commands::Remove { id, from, to } => commands::remove::execute(&mut journal, id, from, to),
-        Commands::View { id, from, to, tags } => {
-            commands::view::execute(&journal, id, from, to, tags)
-        }
+        Commands::Remove { args } => commands::remove::execute(&mut journal, args),
+        Commands::View { args } => commands::view::execute(&journal, args),
         Commands::Edit { id } => commands::edit::execute(&mut journal, id),
-        Commands::Search { query, tags } => commands::search::execute(&journal, &query, tags),
+        Commands::Search { args } => commands::search::execute(&journal, args),
     }
 }

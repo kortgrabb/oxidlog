@@ -1,7 +1,7 @@
-use crate::{error::JotResult, storage::Journal, utils};
+use crate::{cli::{SearchArgs}, error::JotResult, storage::Journal, utils};
 
-pub fn execute(journal: &Journal, query: &str, tags: Vec<String>) -> JotResult<()> {
-    let term = query.to_lowercase();
+pub fn execute(journal: &Journal, args: SearchArgs) -> JotResult<()> {
+    let term = args.query.to_lowercase();
     let entries = journal.get_entries();
 
     if entries.is_empty() {
@@ -11,7 +11,7 @@ pub fn execute(journal: &Journal, query: &str, tags: Vec<String>) -> JotResult<(
             .iter()
             .filter(|e| {
                 let content_matches = e.body.to_lowercase().contains(&term);
-                utils::do_tags_match(&tags, &e.tags) && content_matches
+                utils::do_tags_match(&args.tags, &e.tags) && content_matches
             })
             .map(|e| format!("{}", e))
             .collect();

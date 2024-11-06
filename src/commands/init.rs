@@ -1,9 +1,15 @@
 use crate::error::JotResult;
 use crate::storage;
-use crate::storage::config::Config;
+use crate::storage::config::{Config, JournalConfig};
 
-// FIXME: ask if overwrite is ok
-pub fn execute(config: &Config) -> JotResult<()> {
-    storage::init_journal(config)?;
+pub fn execute() -> JotResult<()> {
+    let new_config = Config {
+        journal_cfg: JournalConfig {
+            show_time: true,
+            body_tags: true,
+            ..Default::default()
+        }
+    };
+    storage::init_journal(&new_config)?;
     Ok(())
 }

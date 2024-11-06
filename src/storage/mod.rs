@@ -14,11 +14,11 @@ const JOURNAL_FILE: &str = "journal.json";
 // ! Journal Related
 
 // Update load_journal to take config as parameter
-pub fn load_journal(config: &Config) -> Journal {
-    let journal_path = if config.journal_path().is_empty() {
+pub fn load_journal() -> Journal {
+    let journal_path = if get_journal_path().unwrap().exists() { 
         get_journal_path().unwrap()
     } else {
-        PathBuf::from(config.journal_path())
+        PathBuf::from(JOURNAL_DIR).join(JOURNAL_FILE)
     };
 
     match load_from_path(journal_path) {
@@ -77,10 +77,10 @@ pub fn get_journal_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
 
 // Update init_journal to take config
 pub fn init_journal(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
-    let journal_path = if config.journal_path().is_empty() {
+    let journal_path = if get_journal_path()?.exists() {
         get_journal_path()?
     } else {
-        let path = PathBuf::from(config.journal_path());
+        let path = get_journal_path()?;
         std::fs::create_dir_all(path.parent().unwrap())?;
         path
     };
