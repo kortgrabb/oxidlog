@@ -1,0 +1,7 @@
+site_name: OxidLog Documentation
+site_description: Documentation for the OxidLog command-line note-taking application
+repo_url: https://github.com/kortgrabb/oxidlog
+repo_name: kortgrabb/oxidlog
+
+theme:
+  name: readthedocs
