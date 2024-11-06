@@ -55,8 +55,21 @@ pub fn format_entry(entry: &Entry, show_time: bool) -> String {
     if !entry.tags.is_empty() {
         formatted.push_str(&format!(" {}", entry.tags.join(", ").italic().dimmed()));
     }
-    formatted.push_str(&format!("\n{}\n", entry.body));
 
+    let body_colored = entry
+        .body
+        .split_whitespace()
+        .map(|word| {
+            if word.starts_with('#') {
+                word.bright_green().to_string()
+            } else {
+                word.to_string()
+            }
+        })
+        .collect::<Vec<String>>();
+
+    formatted.push_str(&format!("\n{}\n", body_colored.join(" ")));
     formatted.push_str(&"-".repeat(40));
+
     formatted
 }

@@ -15,6 +15,14 @@ pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<
         } else {
             println!("Entry with id {id} not found");
         }
+    } else if args.recent {
+        let entries = journal.get_entries();
+        let last = entries.iter().last();
+
+        if let Some(last) = last {
+            let formatted = utils::format_entry(last, config.journal_cfg.show_time);
+            println!("{formatted}");
+        }
     } else {
         let entries = journal
             .get_entries()

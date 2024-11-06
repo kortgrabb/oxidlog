@@ -23,6 +23,8 @@ pub struct ViewArgs {
     pub from: Option<String>,
     pub to: Option<String>,
     pub tags: Vec<String>,
+    #[clap(short, long)]
+    pub recent: bool,
 }
 
 #[derive(clap::Args, Clone)]
