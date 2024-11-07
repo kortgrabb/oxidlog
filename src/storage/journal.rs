@@ -101,16 +101,9 @@ impl Journal {
         }
     }
 
-    pub fn edit_entry(&mut self, id: usize, new_body: &str) -> Option<Entry> {
-        if let Some(entry) = self.entries.iter_mut().find(|e| e.id == id) {
-            let old_body = entry.body.clone();
-            entry.body = new_body.to_string();
-            Some(Entry {
-                body: old_body,
-                ..entry.clone()
-            })
-        } else {
-            None
+    pub fn update_entry(&mut self, entry: Entry) {
+        if let Some(index) = self.entries.iter().position(|e| e.id == entry.id) {
+            self.entries[index] = entry;
         }
     }
 
