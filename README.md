@@ -1,6 +1,8 @@
-# OxidLog - A Powerful Terminal Journal
+# OxidLog - A powerful note-manager
 
-Transform your terminal into a personal journaling space with OxidLog. This lightweight CLI tool makes daily logging, note-taking, and task management seamless through a simple yet powerful interface.
+This is a powerful tool that allows you to take notes, todos, or even journal!
+With many different features you can make this tool what you need it to be.
+The only limit is.. text!!
 
 ## Quick Start
 
