@@ -1,10 +1,6 @@
 use chrono::{DateTime, NaiveDate, Utc};
-use colored::Colorize;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::path::PathBuf;
-
-use crate::storage::load_config;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Entry {
@@ -117,5 +113,59 @@ impl Journal {
 
     pub fn next_id(&self) -> usize {
         self.entries.len()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Duration;
+
+    #[test]
+    fn test_entry_creation() {
+        let entry = Entry::new(1, "Test entry".to_string(), vec!["test".to_string()]);
+        assert_eq!(entry.id, 1);
+        assert_eq!(entry.body, "Test entry");
+        assert_eq!(entry.tags, vec!["test"]);
+        assert!(entry.timestamp <= Utc::now());
+    }
+
+    #[test]
+    fn test_journal_operations() {
+        let path = PathBuf::from("test_journal.json");
+        let mut journal = Journal::new(path.clone());
+
+        // Test adding entries
+        journal.add_entry(Entry::new(0, "First entry".to_string(), vec![]));
+        journal.add_entry(Entry::new(
+            0,
+            "Second entry".to_string(),
+            vec!["tag1".to_string()],
+        ));
+
+        assert_eq!(journal.entries().len(), 2);
+        assert_eq!(journal.get_entry(0).unwrap().body, "First entry");
+        assert_eq!(journal.get_entry(1).unwrap().body, "Second entry");
+
+        // Test removing entries
+        let removed = journal.remove_entry(0);
+        assert!(removed.is_some());
+        assert_eq!(journal.entries().len(), 1);
+
+        // Test updating entries
+        let mut entry = journal.get_entry(1).unwrap().clone();
+        entry.body = "Updated entry".to_string();
+        journal.update_entry(entry);
+        assert_eq!(journal.get_entry(1).unwrap().body, "Updated entry");
+    }
+
+    #[test]
+    fn test_journal_next_id() {
+        let path = PathBuf::from("test_journal.json");
+        let mut journal = Journal::new(path);
+
+        assert_eq!(journal.next_id(), 0);
+        journal.add_entry(Entry::new(0, "Entry".to_string(), vec![]));
+        assert_eq!(journal.next_id(), 1);
     }
 }

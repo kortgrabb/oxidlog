@@ -10,17 +10,9 @@ pub fn execute(journal: &mut Journal, content: String, config: &Config) -> JotRe
         .filter(|w| w.starts_with('#'))
         .map(|w| w[1..].to_string())
         .collect();
-    let mut body = String::from(content.trim());
+    let body = String::from(content.trim());
     if body.is_empty() {
         return Err(JotError::AddError("Entry cannot be empty".to_string()));
-    }
-
-    if !config.journal_cfg.body_tags {
-        body = content
-            .split_whitespace()
-            .filter(|word| !word.starts_with('#'))
-            .collect::<Vec<&str>>()
-            .join(" ");
     }
 
     let entry = Entry::new(journal.next_id(), body, tags);

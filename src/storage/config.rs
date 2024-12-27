@@ -6,8 +6,33 @@ pub struct Config {
     pub journal_cfg: JournalConfig,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 pub struct JournalConfig {
     pub body_tags: bool,
     pub show_time: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_default() {
+        let config = Config::default();
+        assert!(!config.journal_cfg.body_tags);
+        assert!(!config.journal_cfg.show_time);
+    }
+
+    #[test]
+    fn test_config_serialization() {
+        let mut config = Config::default();
+        config.journal_cfg.body_tags = true;
+        config.journal_cfg.show_time = true;
+
+        let serialized = toml::to_string(&config).unwrap();
+        let deserialized: Config = toml::from_str(&serialized).unwrap();
+
+        assert_eq!(deserialized.journal_cfg.body_tags, true);
+        assert_eq!(deserialized.journal_cfg.show_time, true);
+    }
 }

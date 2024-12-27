@@ -36,7 +36,7 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
 
                 utils::do_tags_match(&args.tags, &e.tags) && content_matches
             })
-            .map(|e| utils::format_entry(e, config.journal_cfg.show_time))
+            .map(|e| utils::format_entry(e, config.journal_cfg.clone()))
             .collect();
 
         println!("{} entries found", found.len());

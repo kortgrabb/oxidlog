@@ -1,9 +1,20 @@
 use crate::{
     cli::ViewArgs,
     error::JotResult,
-    storage::{config::Config, Journal},
+    storage::{config::Config, Entry, Journal},
     utils,
 };
+
+fn print_formatted_entries(entries: &[&Entry], config: &Config) {
+    if entries.is_empty() {
+        println!("No entries found.");
+    } else {
+        println!("{} entries found", entries.len());
+        entries
+            .iter()
+            .for_each(|e| println!("{}", utils::format_entry(e, config.journal_cfg.clone())));
+    }
+}
 
 pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<()> {
     if let Some(id) = args.id {
@@ -17,17 +28,13 @@ pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<
         }
     } else if args.recent {
         let entries = journal.get_entries();
-        let last = entries.iter().last();
-
-        if let Some(last) = last {
-            let formatted = utils::format_entry(last, config.journal_cfg.show_time);
-            println!("{formatted}");
+        if let Some(last) = entries.iter().last() {
+            print_formatted_entries(&[last], config);
         }
     } else {
         let entries = journal
             .get_entries()
             .iter()
-            // Filter entries by date and tags
             .filter(|e| {
                 if let Some(from) = &args.from {
                     let parsed_date = utils::parse_date(from);
@@ -45,14 +52,7 @@ pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<
             })
             .collect::<Vec<_>>();
 
-        if entries.is_empty() {
-            println!("No entries found.");
-        } else {
-            println!("{} entries found", entries.len());
-            entries.iter().for_each(|e| {
-                println!("{}", utils::format_entry(e, config.journal_cfg.show_time,))
-            });
-        }
+        print_formatted_entries(&entries, config);
     }
 
     Ok(())

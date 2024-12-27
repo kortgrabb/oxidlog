@@ -2,7 +2,7 @@ use std::io::{self, Write};
 
 use colored::Colorize;
 
-use crate::storage::Entry;
+use crate::storage::{config::JournalConfig, Entry};
 
 pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt);
@@ -29,7 +29,7 @@ pub fn parse_date(date: &str) -> chrono::NaiveDate {
     }
 }
 
-pub fn format_entry(entry: &Entry, show_time: bool) -> String {
+pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     let mut formatted = String::new();
     formatted.push_str(
         &format!(
@@ -40,7 +40,7 @@ pub fn format_entry(entry: &Entry, show_time: bool) -> String {
         .to_string(),
     );
 
-    if show_time {
+    if cfg.show_time {
         formatted.push_str(&format!(
             " {}",
             entry
