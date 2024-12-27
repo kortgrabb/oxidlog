@@ -15,7 +15,7 @@ const JOURNAL_FILE: &str = "journal.json";
 
 // Update load_journal to take config as parameter
 pub fn load_journal() -> Journal {
-    let journal_path = if get_journal_path().unwrap().exists() { 
+    let journal_path = if get_journal_path().unwrap().exists() {
         get_journal_path().unwrap()
     } else {
         PathBuf::from(JOURNAL_DIR).join(JOURNAL_FILE)
@@ -93,6 +93,12 @@ pub fn init_journal(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     save_config(config)?;
 
     Ok(())
+}
+
+pub fn journal_exists() -> bool {
+    let home_dir = dirs::home_dir().expect("Could not find home directory");
+    let journal_dir = home_dir.join(".oxidlog");
+    journal_dir.exists()
 }
 
 // ! Config Related

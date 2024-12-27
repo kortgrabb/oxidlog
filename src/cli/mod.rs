@@ -12,7 +12,10 @@ struct Cli {
 // New argument structs
 #[derive(clap::Args, Clone)]
 pub struct RemoveArgs {
-    pub id: usize,
+    #[clap(short, long)]
+    pub id: Option<usize>,
+    #[clap(short, long)]
+    pub range: Option<String>,
     pub from: Option<String>,
     pub to: Option<String>,
 }
