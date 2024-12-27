@@ -1,4 +1,4 @@
-# OxidLog - A powerful note-manager
+# OxidLog - A Personal Knowledge Manager
 
 This is a powerful tool that allows you to take notes, todos, or even journal!
 With many different features you can make this tool what you need it to be.
