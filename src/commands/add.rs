@@ -4,7 +4,7 @@ use crate::error::{JotError, JotResult};
 use crate::storage::config::Config;
 use crate::storage::{self, Entry, Journal};
 
-pub fn execute(journal: &mut Journal, content: String, config: &Config) -> JotResult<()> {
+pub fn execute(journal: &mut Journal, content: String, _config: &Config) -> JotResult<()> {
     let tags = content
         .split_whitespace()
         .filter(|w| w.starts_with('#'))

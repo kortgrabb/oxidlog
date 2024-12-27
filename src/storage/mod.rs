@@ -120,7 +120,7 @@ pub fn get_config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
 pub fn load_config() -> Result<Config, Box<dyn std::error::Error>> {
     let config_path = get_config_path()?;
     println!("config loaded");
-    if (!config_path.exists()) {
+    if !config_path.exists() {
         return Ok(Config::default());
     }
 

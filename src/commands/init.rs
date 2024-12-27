@@ -21,7 +21,6 @@ pub fn execute() -> JotResult<()> {
         journal_cfg: JournalConfig {
             show_time: true,
             body_tags: true,
-            ..Default::default()
         },
     };
     storage::init_journal(&new_config)?;

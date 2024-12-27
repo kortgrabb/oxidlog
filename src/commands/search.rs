@@ -20,14 +20,14 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
                 let content_matches = e.body.to_lowercase().contains(&term);
 
                 if let Some(from) = &args.from {
-                    let date = utils::parse_date(&from);
+                    let date = utils::parse_date(from);
                     if date < e.date {
                         return false;
                     }
                 }
 
                 if let Some(to) = &args.to {
-                    let date = utils::parse_date(&to);
+                    let date = utils::parse_date(to);
 
                     if date > e.date {
                         return false;
