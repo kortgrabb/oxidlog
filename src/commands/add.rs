@@ -4,7 +4,13 @@ use crate::error::{JotError, JotResult};
 use crate::storage::config::Config;
 use crate::storage::{self, Entry, Journal};
 
-pub fn execute(journal: &mut Journal, content: String, _config: &Config) -> JotResult<()> {
+#[derive(clap::Args, Clone)]
+pub struct AddArgs {
+    pub content: String,
+}
+
+pub fn execute(journal: &mut Journal, args: AddArgs, _config: &Config) -> JotResult<()> {
+    let content = args.content.trim();
     let tags = content
         .split_whitespace()
         .filter(|w| w.starts_with('#'))

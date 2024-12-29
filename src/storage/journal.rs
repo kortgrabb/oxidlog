@@ -119,7 +119,6 @@ impl Journal {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Duration;
 
     #[test]
     fn test_entry_creation() {

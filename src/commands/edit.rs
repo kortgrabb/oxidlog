@@ -5,7 +5,13 @@ use crate::{
 };
 use colored::Colorize;
 
-pub fn execute(journal: &mut Journal, id: usize) -> JotResult<()> {
+#[derive(clap::Args, Clone)]
+pub struct EditArgs {
+    pub id: usize,
+}
+
+pub fn execute(journal: &mut Journal, args: EditArgs) -> JotResult<()> {
+    let id = args.id;
     match journal.get_entry(id) {
         Some(entry) => {
             println!("Editing entry: {}", entry.body);

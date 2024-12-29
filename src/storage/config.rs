@@ -10,6 +10,12 @@ pub struct Config {
 pub struct JournalConfig {
     pub body_tags: bool,
     pub show_time: bool,
+    #[serde(default = "default_export_dir")]
+    pub export_dir: String,
+}
+
+fn default_export_dir() -> String {
+    "exports".to_string()
 }
 
 #[cfg(test)]

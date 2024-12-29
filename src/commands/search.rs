@@ -1,11 +1,20 @@
 use crate::{
-    cli::SearchArgs,
     error::JotResult,
     storage::{config::Config, Journal},
     utils,
 };
 
 // TODO: Add date-filter, case-sensitive search, regex search
+
+#[derive(clap::Args, Clone)]
+pub struct SearchArgs {
+    pub query: String,
+    pub tags: Vec<String>,
+    #[clap(short, long)]
+    pub from: Option<String>,
+    #[clap(short, long)]
+    pub to: Option<String>,
+}
 
 pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResult<()> {
     let term = args.query.to_lowercase();

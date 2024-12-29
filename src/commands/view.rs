@@ -1,9 +1,21 @@
 use crate::{
-    cli::ViewArgs,
     error::JotResult,
     storage::{config::Config, Entry, Journal},
     utils,
 };
+
+#[derive(clap::Args, Clone)]
+pub struct ViewArgs {
+    pub id: Option<usize>,
+    #[clap(short, long)]
+    pub from: Option<String>,
+    #[clap(short, long)]
+    pub to: Option<String>,
+    #[clap(long)]
+    pub tags: Vec<String>,
+    #[clap(short, long)]
+    pub recent: bool,
+}
 
 fn print_formatted_entries(entries: &[&Entry], config: &Config) {
     if entries.is_empty() {

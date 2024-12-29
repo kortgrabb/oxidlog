@@ -21,6 +21,12 @@ pub enum JotError {
 
     #[error("{0}")]
     Other(#[from] Box<dyn std::error::Error>),
+
+    #[error("Failed to parse TOML: {0}")]
+    TomlParseError(#[from] toml::de::Error),
+
+    #[error("Failed to serialize TOML: {0}")]
+    TomlSerializeError(#[from] toml::ser::Error),
 }
 
 pub type JotResult<T> = Result<T, JotError>;
