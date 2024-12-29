@@ -49,7 +49,14 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
             .collect();
 
         println!("{} entries found", found.len());
-        found.iter().for_each(|e| println!("{}", e));
+        found.iter().for_each(|e| {
+            if term.is_empty() {
+                println!("{}", e);
+            } else {
+                let highlighted = e.replace(&term, &format!("\x1b[42m{}\x1b[0m", &term));
+                println!("{}", highlighted);
+            }
+        });
     }
 
     Ok(())

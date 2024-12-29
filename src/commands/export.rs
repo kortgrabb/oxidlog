@@ -1,9 +1,8 @@
 use crate::{
     error::JotResult,
-    storage::{config::Config, Entry, Journal},
+    storage::{config::Config, Journal},
 };
 use chrono::Local;
-use serde::Serialize;
 use std::fs;
 use std::path::PathBuf;
 
@@ -17,14 +16,7 @@ pub struct ExportArgs {
 pub enum ExportFormat {
     Json,
     Csv,
-    Toml,
     Plain,
-}
-
-// Add wrapper struct for TOML
-#[derive(Serialize)]
-struct TomlWrapper {
-    entries: Vec<Entry>,
 }
 
 pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotResult<()> {
@@ -36,7 +28,6 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
     let filename = match args.format {
         ExportFormat::Json => format!("journal_{}.json", timestamp),
         ExportFormat::Csv => format!("journal_{}.csv", timestamp),
-        ExportFormat::Toml => format!("journal_{}.toml", timestamp),
         ExportFormat::Plain => format!("journal_{}.txt", timestamp),
     };
 
@@ -54,12 +45,6 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
                 ));
             }
             csv
-        }
-        ExportFormat::Toml => {
-            let wrapper = TomlWrapper {
-                entries: entries.to_vec(),
-            };
-            toml::to_string(&wrapper)?
         }
         ExportFormat::Plain => {
             let mut text = String::new();

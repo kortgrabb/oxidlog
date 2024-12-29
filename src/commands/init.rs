@@ -3,7 +3,10 @@ use crate::storage;
 use crate::storage::config::{Config, JournalConfig};
 use dialoguer::Confirm;
 
-pub fn execute() -> JotResult<()> {
+#[derive(clap::Args, Clone)]
+pub struct InitArgs {}
+
+pub fn execute(_args: InitArgs) -> JotResult<()> {
     if storage::journal_exists() {
         let proceed = Confirm::new()
             .with_prompt("A journal already exists. Do you want to overwrite it?")
