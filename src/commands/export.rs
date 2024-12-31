@@ -1,15 +1,19 @@
 use crate::{
-    error::JotResult,
+    error::{JotError, JotResult},
     storage::{config::Config, Journal},
 };
 use chrono::Local;
 use std::fs;
-use std::path::PathBuf;
 
 #[derive(clap::Args, Clone)]
 pub struct ExportArgs {
     #[clap(value_enum)]
+    /// The format to export the journal in (json, csv, plain)
     pub format: ExportFormat,
+
+    #[clap(short, long)]
+    /// Open the exported file with the default program
+    pub open: bool,
 }
 
 #[derive(clap::ValueEnum, Clone)]
@@ -21,7 +25,10 @@ pub enum ExportFormat {
 
 pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotResult<()> {
     let entries = journal.get_entries();
-    let export_dir = PathBuf::from(&config.journal_cfg.export_dir);
+    let export_dir = journal.path()
+        .parent()
+        .unwrap_or(journal.path())
+        .join(&config.journal_cfg.export_dir);
     fs::create_dir_all(&export_dir)?;
 
     let timestamp = Local::now().format("%Y%m%d_%H%M%S");
@@ -36,12 +43,17 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
         ExportFormat::Csv => {
             let mut csv = String::from("date,title,body,tags\n");
             for entry in entries {
-                let tags = entry.tags.join(",");
+                let tags = entry.tags.iter()
+                    .map(|t| t.name.as_str())
+                    .collect::<Vec<_>>()
+                    .join(",");
                 csv.push_str(&format!(
                     "{},{},{}\n",
                     entry.date,
-                    entry.body.replace(",", "\\,"),
+                    entry.body.replace("\n", " "),
                     tags
+
+                    
                 ));
             }
             csv
@@ -51,7 +63,11 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
             for entry in entries {
                 text.push_str(&format!("Date: {}\n", entry.date));
                 if !entry.tags.is_empty() {
-                    text.push_str(&format!("Tags: {}\n", entry.tags.join(", ")));
+                    let tags_str = entry.tags.iter()
+                        .map(|t| t.name.as_str())
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    text.push_str(&format!("Tags: {}\n", tags_str));
                 }
                 text.push_str(&format!("\n{}\n", entry.body));
                 text.push_str("\n---\n\n");
@@ -61,7 +77,34 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
     };
 
     let export_path = export_dir.join(filename);
-    fs::write(export_path, content)?;
+    fs::write(&export_path, content)?;
+
+    if args.open {
+        // run xdg-open on Linux, open on macOS, or start on Windows
+        let platform = std::env::consts::OS;
+        let command = match platform {
+            "linux" => "xdg-open",
+            "macos" => "open",
+            "windows" => "start",
+            _ => {
+                return Err(JotError::ExportError(
+                    format!("Cannot open exported file: unsupported platform '{}'", platform)
+                ));
+            }
+        };
+
+        let path = export_path.to_str().ok_or_else(|| {
+            JotError::ExportError("Export path contains invalid Unicode".to_string())
+        })?;
+
+        let status = std::process::Command::new(command).arg(path).status()?;
+
+        if !status.success() {
+            return Err(JotError::ExportError(
+                format!("Failed to open exported file '{}' with system command '{}'", path, command)
+            ));
+        }
+    }
 
     println!(
         "Journal exported successfully to {}",

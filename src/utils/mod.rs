@@ -2,7 +2,7 @@ use std::io::{self, Write};
 
 use colored::Colorize;
 
-use crate::storage::{config::JournalConfig, Entry};
+use crate::storage::{config::JournalConfig, Entry, Tag};
 
 pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt);
@@ -12,11 +12,27 @@ pub fn get_input(prompt: &str) -> String {
     input.trim().to_string()
 }
 
-pub fn do_tags_match(tags: &[String], entry_tags: &[String]) -> bool {
-    if tags.is_empty() {
+pub enum TagMatch {
+    Any,  // OR operation
+    All,  // AND operation
+}
+
+pub fn do_tags_match(query_tags: &[Tag], entry_tags: &[Tag], match_type: TagMatch) -> bool {
+    if query_tags.is_empty() {
         return true;
     }
-    entry_tags.iter().any(|t| tags.contains(&t.to_string()))
+
+    match match_type {
+        TagMatch::Any => query_tags.iter().any(|tag| entry_tags.contains(tag)),
+        TagMatch::All => query_tags.iter().all(|tag| entry_tags.contains(tag)),
+    }
+}
+
+// Helper function for parsing multiple tags from strings
+pub fn parse_tags(tags: &str) -> Vec<Tag> {
+    tags.split_whitespace()
+        .map(|t| t.parse::<Tag>().unwrap())
+        .collect()
 }
 
 pub fn parse_date(date: &str) -> chrono::NaiveDate {
@@ -53,7 +69,7 @@ pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     }
 
     if !entry.tags.is_empty() {
-        formatted.push_str(&format!(" {}", entry.tags.join(", ").italic().dimmed()));
+        formatted.push_str(&format!(" {}", entry.tags.iter().map(|t| t.to_string()).collect::<Vec<String>>().join(" ").bright_yellow()));
     }
 
     let body_colored = entry

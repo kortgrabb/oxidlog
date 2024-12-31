@@ -1,7 +1,7 @@
 use crate::{
     error::JotResult,
-    storage::{config::Config, Journal},
-    utils,
+    storage::{config::Config, Journal, Tag},
+    utils::{self, TagMatch},
 };
 
 // TODO: Add date-filter, case-sensitive search, regex search
@@ -43,7 +43,13 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
                     }
                 }
 
-                utils::do_tags_match(&args.tags, &e.tags) && content_matches
+                utils::do_tags_match(
+                    &args.tags.iter()
+                        .map(|t| Tag::new(t.to_string()))
+                        .collect::<Vec<_>>(),
+                    &e.tags,
+                    TagMatch::Any
+                ) && content_matches
             })
             .map(|e| utils::format_entry(e, config.journal_cfg.clone()))
             .collect();

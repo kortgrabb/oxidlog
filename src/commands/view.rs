@@ -1,7 +1,7 @@
 use crate::{
     error::JotResult,
-    storage::{config::Config, Entry, Journal},
-    utils,
+    storage::{config::Config, Entry, Journal, Tag},
+    utils::{self, TagMatch},
 };
 
 #[derive(clap::Args, Clone)]
@@ -34,7 +34,7 @@ pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<
             println!("ID: {}", entry.id);
             println!("Date: {}", entry.date);
             println!("Body: {}", entry.body);
-            println!("Tags: {}", entry.tags.join(", "));
+            println!("Tags: {}", entry.tags.iter().map(|t| t.name.as_str()).collect::<Vec<_>>().join(", "));
         } else {
             println!("Entry with id {id} not found");
         }
@@ -60,7 +60,13 @@ pub fn execute(journal: &Journal, args: ViewArgs, config: &Config) -> JotResult<
                         return false;
                     }
                 }
-                utils::do_tags_match(&args.tags, &e.tags)
+                utils::do_tags_match(
+                    &args.tags.iter()
+                        .map(|t| Tag::new(t.to_string()))
+                        .collect::<Vec<_>>(),
+                    &e.tags,
+                    TagMatch::Any
+                )
             })
             .collect::<Vec<_>>();
 

@@ -1,6 +1,6 @@
 use crate::{
     error::{JotError, JotResult},
-    storage::{self, Entry, Journal},
+    storage::{self, Entry, Journal, Tag},
     utils,
 };
 use colored::Colorize;
@@ -16,11 +16,11 @@ pub fn execute(journal: &mut Journal, args: EditArgs) -> JotResult<()> {
         Some(entry) => {
             println!("Editing entry: {}", entry.body);
             let new_body = utils::get_input(&format!("Enter new content [{}]: ", entry.body));
-            let tags_str = entry.tags.join(" ");
-            let new_tags: Vec<String> =
+            let tags_str = entry.tags.iter().map(|t| t.name.clone()).collect::<Vec<_>>().join(" ");
+            let new_tags: Vec<Tag> =
                 utils::get_input(&format!("Enter new tags [{}]: ", tags_str))
                     .split_whitespace()
-                    .map(|s| s.to_string())
+                    .map(|s| Tag::new(s.to_string()))
                     .collect();
 
             let new_entry = Entry {

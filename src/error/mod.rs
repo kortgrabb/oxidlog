@@ -27,6 +27,9 @@ pub enum JotError {
 
     #[error("Failed to serialize TOML: {0}")]
     TomlSerializeError(#[from] toml::ser::Error),
+
+    #[error("Export error: {0}")]
+    ExportError(String),
 }
 
 pub type JotResult<T> = Result<T, JotError>;

@@ -1,11 +1,11 @@
 pub mod config;
-mod journal;
+pub mod journal;
+
+pub use journal::{Entry, Journal, Tag};
 
 use config::Config;
 use std::path::PathBuf;
 use std::{fs, process};
-
-pub use journal::{Entry, Journal};
 
 const CONFIG_FILE: &str = "config.toml";
 const JOURNAL_DIR: &str = ".oxidlog";

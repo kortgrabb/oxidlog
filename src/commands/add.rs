@@ -2,7 +2,7 @@ use colored::Colorize;
 
 use crate::error::{JotError, JotResult};
 use crate::storage::config::Config;
-use crate::storage::{self, Entry, Journal};
+use crate::storage::{self, Entry, Journal, Tag};
 
 #[derive(clap::Args, Clone)]
 pub struct AddArgs {
@@ -14,7 +14,7 @@ pub fn execute(journal: &mut Journal, args: AddArgs, _config: &Config) -> JotRes
     let tags = content
         .split_whitespace()
         .filter(|w| w.starts_with('#'))
-        .map(|w| w[1..].to_string())
+        .map(|w| Tag::new(w[1..].to_string()))
         .collect();
     let body = String::from(content.trim());
     if body.is_empty() {
