@@ -10,7 +10,6 @@ pub struct ExportArgs {
     #[clap(value_enum)]
     /// The format to export the journal in (json, csv, plain)
     pub format: ExportFormat,
-
     #[clap(short, long)]
     /// Open the exported file with the default program
     pub open: bool,
@@ -25,7 +24,8 @@ pub enum ExportFormat {
 
 pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotResult<()> {
     let entries = journal.get_entries();
-    let export_dir = journal.path()
+    let export_dir = journal
+        .path()
         .parent()
         .unwrap_or(journal.path())
         .join(&config.journal_cfg.export_dir);
@@ -43,7 +43,9 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
         ExportFormat::Csv => {
             let mut csv = String::from("date,title,body,tags\n");
             for entry in entries {
-                let tags = entry.tags.iter()
+                let tags = entry
+                    .tags
+                    .iter()
                     .map(|t| t.name.as_str())
                     .collect::<Vec<_>>()
                     .join(",");
@@ -52,8 +54,6 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
                     entry.date,
                     entry.body.replace("\n", " "),
                     tags
-
-                    
                 ));
             }
             csv
@@ -63,7 +63,9 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
             for entry in entries {
                 text.push_str(&format!("Date: {}\n", entry.date));
                 if !entry.tags.is_empty() {
-                    let tags_str = entry.tags.iter()
+                    let tags_str = entry
+                        .tags
+                        .iter()
                         .map(|t| t.name.as_str())
                         .collect::<Vec<_>>()
                         .join(", ");
@@ -87,9 +89,10 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
             "macos" => "open",
             "windows" => "start",
             _ => {
-                return Err(JotError::ExportError(
-                    format!("Cannot open exported file: unsupported platform '{}'", platform)
-                ));
+                return Err(JotError::ExportError(format!(
+                    "Cannot open exported file: unsupported platform '{}'",
+                    platform
+                )));
             }
         };
 
@@ -100,9 +103,10 @@ pub fn execute(journal: &mut Journal, args: ExportArgs, config: &Config) -> JotR
         let status = std::process::Command::new(command).arg(path).status()?;
 
         if !status.success() {
-            return Err(JotError::ExportError(
-                format!("Failed to open exported file '{}' with system command '{}'", path, command)
-            ));
+            return Err(JotError::ExportError(format!(
+                "Failed to open exported file '{}' with system command '{}'",
+                path, command
+            )));
         }
     }
 

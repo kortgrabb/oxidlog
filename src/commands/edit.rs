@@ -16,12 +16,16 @@ pub fn execute(journal: &mut Journal, args: EditArgs) -> JotResult<()> {
         Some(entry) => {
             println!("Editing entry: {}", entry.body);
             let new_body = utils::get_input(&format!("Enter new content [{}]: ", entry.body));
-            let tags_str = entry.tags.iter().map(|t| t.name.clone()).collect::<Vec<_>>().join(" ");
-            let new_tags: Vec<Tag> =
-                utils::get_input(&format!("Enter new tags [{}]: ", tags_str))
-                    .split_whitespace()
-                    .map(|s| Tag::new(s.to_string()))
-                    .collect();
+            let tags_str = entry
+                .tags
+                .iter()
+                .map(|t| t.name.clone())
+                .collect::<Vec<_>>()
+                .join(" ");
+            let new_tags: Vec<Tag> = utils::get_input(&format!("Enter new tags [{}]: ", tags_str))
+                .split_whitespace()
+                .map(|s| Tag::new(s.to_string()))
+                .collect();
 
             let new_entry = Entry {
                 id: entry.id,

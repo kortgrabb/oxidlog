@@ -10,15 +10,18 @@ use crate::{
 pub struct SearchArgs {
     pub query: String,
     pub tags: Vec<String>,
-    #[clap(short, long)]
+    #[clap(long)]
     pub from: Option<String>,
-    #[clap(short, long)]
+    #[clap(long)]
     pub to: Option<String>,
+    #[clap(short, long)]
+    pub fuzzy: bool,
 }
 
 pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResult<()> {
     let term = args.query.to_lowercase();
     let entries = journal.get_entries();
+    let do_fuzzy = args.fuzzy;
 
     if entries.is_empty() {
         println!("No entries found.");
@@ -26,7 +29,13 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
         let found: Vec<String> = entries
             .iter()
             .filter(|e| {
-                let content_matches = e.body.to_lowercase().contains(&term);
+                let content = e.body.to_lowercase();
+
+                let content_matches = if do_fuzzy {
+                    utils::fuzzy_match(&content, &term)
+                } else {
+                    content.contains(&term)
+                };
 
                 if let Some(from) = &args.from {
                     let date = utils::parse_date(from);
@@ -44,11 +53,13 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
                 }
 
                 utils::do_tags_match(
-                    &args.tags.iter()
+                    &args
+                        .tags
+                        .iter()
                         .map(|t| Tag::new(t.to_string()))
                         .collect::<Vec<_>>(),
                     &e.tags,
-                    TagMatch::Any
+                    TagMatch::Any,
                 ) && content_matches
             })
             .map(|e| utils::format_entry(e, config.journal_cfg.clone()))

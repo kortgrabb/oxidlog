@@ -1,3 +1,4 @@
 [journal_cfg]
-body_tags = false
-show_time = false
+body_tags = true
+show_time = true
+export_dir = "exports"

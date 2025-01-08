@@ -13,8 +13,8 @@ pub fn get_input(prompt: &str) -> String {
 }
 
 pub enum TagMatch {
-    Any,  // OR operation
-    All,  // AND operation
+    Any, // OR operation
+    All, // AND operation
 }
 
 pub fn do_tags_match(query_tags: &[Tag], entry_tags: &[Tag], match_type: TagMatch) -> bool {
@@ -36,15 +36,8 @@ pub fn parse_tags(tags: &str) -> Vec<Tag> {
 }
 
 pub fn parse_date(date: &str) -> chrono::NaiveDate {
-    match chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d") {
-        Ok(date) => date,
-        Err(_) => {
-            eprintln!("Invalid date format");
-            std::process::exit(1);
-        }
-    }
+    chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").unwrap()
 }
-
 pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     let mut formatted = String::new();
     formatted.push_str(
@@ -69,7 +62,16 @@ pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     }
 
     if !entry.tags.is_empty() {
-        formatted.push_str(&format!(" {}", entry.tags.iter().map(|t| t.to_string()).collect::<Vec<String>>().join(" ").bright_yellow()));
+        formatted.push_str(&format!(
+            " {}",
+            entry
+                .tags
+                .iter()
+                .map(|t| t.to_string())
+                .collect::<Vec<String>>()
+                .join(" ")
+                .bright_yellow()
+        ));
     }
 
     let body_colored = entry
@@ -88,4 +90,27 @@ pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     formatted.push_str(&"-".repeat(40));
 
     formatted
+}
+
+pub fn fuzzy_match(haystack: &str, needle: &str) -> bool {
+    let mut needle_chars = needle.chars();
+    let mut haystack_chars = haystack.chars();
+
+    while let Some(needle_char) = needle_chars.next() {
+        if let Some(haystack_char) = haystack_chars.next() {
+            if needle_char == haystack_char {
+                continue;
+            } else {
+                while let Some(next_haystack_char) = haystack_chars.next() {
+                    if needle_char == next_haystack_char {
+                        break;
+                    }
+                }
+            }
+        } else {
+            return false;
+        }
+    }
+
+    true
 }
