@@ -39,7 +39,7 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
 
                 if let Some(from) = &args.from {
                     let date = utils::parse_date(from);
-                    if date < e.date {
+                    if date > e.date {
                         return false;
                     }
                 }
@@ -47,7 +47,7 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
                 if let Some(to) = &args.to {
                     let date = utils::parse_date(to);
 
-                    if date > e.date {
+                    if date < e.date {
                         return false;
                     }
                 }
