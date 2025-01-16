@@ -1,4 +1,5 @@
 use thiserror::Error;
+
 #[derive(Error, Debug)]
 pub enum JotError {
     #[error("Failed to initialize jot: {0}")]
@@ -30,6 +31,15 @@ pub enum JotError {
 
     #[error("Export error: {0}")]
     ExportError(String),
+
+    #[error("Failed to execute command: {0}")]
+    CommandError(String),
+}
+
+impl From<&str> for JotError {
+    fn from(s: &str) -> Self {
+        JotError::Other(s.into())
+    }
 }
 
 pub type JotResult<T> = Result<T, JotError>;

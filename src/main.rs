@@ -11,8 +11,15 @@ fn main() {
     let config = match load_config() {
         Ok(config) => config,
         Err(e) => {
-            eprintln!("{} {}", "Error:".red().bold(), format!("Failed to load config - {}", e));
-            eprintln!("{} Run 'xlog init' to create a new configuration", "Tip:".cyan().bold());
+            eprintln!(
+                "{} {}",
+                "Error:".red().bold(),
+                format!("Failed to load config - {}", e)
+            );
+            eprintln!(
+                "{} Run 'xlog init' to create a new configuration",
+                "Tip:".cyan().bold()
+            );
             std::process::exit(1);
         }
     };
@@ -28,22 +35,29 @@ fn main() {
             error::JotError::TomlParseError(_) => "Config Parse",
             error::JotError::TomlSerializeError(_) => "Config Save",
             error::JotError::ExportError(_) => "Export",
+            error::JotError::CommandError(_) => "Command",
             error::JotError::Other(_) => "Unknown",
         };
 
         eprintln!("\n{} {} Error", "Error:".red().bold(), error_type);
         eprintln!("{} {}", "Details:".yellow().bold(), e);
-        
+
         // Provide helpful tips based on error type
         match e {
             error::JotError::IoError(_) => {
-                eprintln!("\n{} Check file permissions and disk space", "Tip:".cyan().bold());
+                eprintln!(
+                    "\n{} Check file permissions and disk space",
+                    "Tip:".cyan().bold()
+                );
             }
             error::JotError::_InitError(_) => {
                 eprintln!("\n{} Try running 'xlog init' again", "Tip:".cyan().bold());
             }
             error::JotError::SerdeError(_) | error::JotError::TomlParseError(_) => {
-                eprintln!("\n{} The journal file may be corrupted. Try backing up and reinitializing", "Tip:".cyan().bold());
+                eprintln!(
+                    "\n{} The journal file may be corrupted. Try backing up and reinitializing",
+                    "Tip:".cyan().bold()
+                );
             }
             _ => {}
         }

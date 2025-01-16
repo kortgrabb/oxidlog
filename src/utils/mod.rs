@@ -2,7 +2,7 @@ use std::io::{self, Write};
 
 use colored::Colorize;
 
-use crate::storage::{config::JournalConfig, Entry, Tag};
+use crate::storage::{config::JournalConfig, Entry, Journal, Tag};
 
 pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt);
@@ -113,4 +113,31 @@ pub fn fuzzy_match(haystack: &str, needle: &str) -> bool {
     }
 
     true
+}
+
+pub fn view_by_id(journal: &Journal, id: usize) {
+    if let Some(entry) = journal.entries().iter().find(|e| e.id == id) {
+        print_single_entry(entry);
+    } else {
+        println!("Entry with id {id} not found");
+    }
+}
+
+pub fn print_single_entry(entry: &Entry) {
+    println!("\n{}", "=".repeat(50));
+    println!("Entry #{}", entry.id);
+    println!("Date: {}", entry.date);
+    println!("\n{}\n", entry.body);
+
+    let tags = entry
+        .tags
+        .iter()
+        .map(|t| format!("#{}", t.name))
+        .collect::<Vec<_>>()
+        .join(" ");
+
+    if !tags.is_empty() {
+        println!("Tags: {}", tags);
+    }
+    println!("{}", "=".repeat(50));
 }

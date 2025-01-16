@@ -5,5 +5,44 @@
     "date": "2025-01-15",
     "body": "hi",
     "tags": []
+  },
+  {
+    "id": 1,
+    "timestamp": "2025-01-16T10:05:47.587959862Z",
+    "date": "2025-01-16",
+    "body": "This is a minecraft note",
+    "tags": [
+      {
+        "name": "mc"
+      },
+      {
+        "name": "note"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "timestamp": "2025-01-16T10:05:54.128748138Z",
+    "date": "2025-01-16",
+    "body": "This is a general note",
+    "tags": [
+      {
+        "name": "general"
+      },
+      {
+        "name": "note"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "timestamp": "2025-01-16T10:11:42.522786330Z",
+    "date": "2025-01-16",
+    "body": "this is minecraft",
+    "tags": [
+      {
+        "name": "mc"
+      }
+    ]
   }
 ]

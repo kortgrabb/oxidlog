@@ -73,9 +73,8 @@ pub fn run(config: &Config) -> JotResult<()> {
     match cli.command {
         Commands::Init { args } => commands::init::execute(args),
         _ => {
-            let mut journal = storage::load_journal().map_err(|e| {
-                JotError::Other(Box::new(e) as Box<dyn std::error::Error>)
-            })?;
+            let mut journal = storage::load_journal()
+                .map_err(|e| JotError::Other(Box::new(e) as Box<dyn std::error::Error>))?;
 
             match cli.command {
                 Commands::Add { args } => commands::add::execute(&mut journal, args, config),
@@ -84,7 +83,7 @@ pub fn run(config: &Config) -> JotResult<()> {
                 Commands::Edit { args } => commands::edit::execute(&mut journal, args),
                 Commands::Search { args } => commands::search::execute(&journal, args, config),
                 Commands::Export { args } => commands::export::execute(&mut journal, args, config),
-                Commands::Init { .. } => unreachable!(),
+                _ => Ok(()),
             }
         }
     }
