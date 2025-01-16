@@ -2,57 +2,93 @@ pub mod config;
 pub mod journal;
 
 pub use journal::{Entry, Journal, Tag};
+use serde::de::Error;
 
+use crate::error::{JotError, JotResult};
 use config::Config;
+use std::fs::{self, File};
+use std::io::{self, Write};
 use std::path::PathBuf;
-use std::{fs, process};
 
 const CONFIG_FILE: &str = "config.toml";
 const JOURNAL_DIR: &str = ".oxidlog";
 const JOURNAL_FILE: &str = "journal.json";
+const BACKUP_EXTENSION: &str = ".bak";
 
 // ! Journal Related
 
-// Update load_journal to take config as parameter
-pub fn load_journal() -> Journal {
-    let journal_path = if get_journal_path().unwrap().exists() {
-        get_journal_path().unwrap()
-    } else {
-        PathBuf::from(JOURNAL_DIR).join(JOURNAL_FILE)
-    };
+/// Load the journal from the default location
+pub fn load_journal() -> JotResult<Journal> {
+    let journal_path = get_journal_path()
+        .map_err(|e| JotError::Other(format!("Failed to get journal path: {}", e).into()))?;
 
-    match load_from_path(journal_path) {
-        Ok(journal) => journal,
-        Err(e) => {
-            eprintln!("Error loading journal: {}", e);
-            process::exit(1);
-        }
+    if !journal_path.exists() {
+        return Err(JotError::Other("Journal not found. Run 'xlog init' to create one.".into()));
     }
+
+    load_from_path(journal_path)
 }
 
-pub fn load_from_path(path: PathBuf) -> std::io::Result<Journal> {
+/// Load a journal from a specific path
+pub fn load_from_path(path: PathBuf) -> JotResult<Journal> {
     match fs::read_to_string(&path) {
         Ok(content) => {
-            let entries: Vec<Entry> = serde_json::from_str(&content)?;
+            // Validate JSON structure before parsing
+            if !content.trim().starts_with('[') || !content.trim().ends_with(']') {
+                return Err(JotError::Other("Invalid journal file format".into()));
+            }
+
+            let entries: Vec<Entry> = serde_json::from_str(&content)
+                .map_err(|e| JotError::SerdeError(e))?;
             Ok(Journal::from_entries(path, entries))
         }
-        Err(_) => Ok(Journal::new(path)), // Return an empty journal if the file doesn't exist
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(Journal::new(path)),
+        Err(e) => Err(JotError::IoError(e)),
     }
 }
 
-pub fn save_journal(journal: &Journal) -> std::io::Result<()> {
-    let serialized_entries = serde_json::to_string(journal.entries())?;
-    match fs::write(journal.path(), serialized_entries) {
-        Ok(_) => Ok(()),
-        Err(e) => {
-            if e.kind() == std::io::ErrorKind::NotFound {
-                eprintln!("Journal could not be found, create one with `xlog init`");
-            } else {
-                eprintln!("Error saving journal: {}", e);
-            }
-            process::exit(1);
-        }
+/// Save the journal with atomic write and backup
+pub fn save_journal(journal: &Journal) -> JotResult<()> {
+    let path = journal.path();
+    let backup_path = path.with_extension(format!("json{}", BACKUP_EXTENSION));
+    
+    // Create backup of existing journal if it exists
+    if path.exists() {
+        fs::copy(path, &backup_path)
+            .map_err(|e| JotError::Other(format!("Failed to create backup: {}", e).into()))?;
     }
+
+    // Serialize entries
+    let serialized_entries = serde_json::to_string_pretty(journal.entries())
+        .map_err(|e| JotError::SerdeError(e))?;
+
+    // Write to temporary file first
+    let temp_path = path.with_extension("json.tmp");
+    {
+        let mut temp_file = File::create(&temp_path)
+            .map_err(|e| JotError::IoError(e))?;
+        temp_file.write_all(serialized_entries.as_bytes())
+            .map_err(|e| JotError::IoError(e))?;
+        temp_file.sync_all()
+            .map_err(|e| JotError::IoError(e))?;
+    }
+
+    // Atomically rename temporary file to actual journal file
+    fs::rename(&temp_path, path)
+        .map_err(|e| JotError::IoError(e))?;
+
+    // Keep only the most recent backup
+    if backup_path.exists() {
+        let old_backup = path.with_extension(format!("json{}.old", BACKUP_EXTENSION));
+        if old_backup.exists() {
+            fs::remove_file(&old_backup)
+                .map_err(|e| JotError::Other(format!("Failed to remove old backup: {}", e).into()))?;
+        }
+        fs::rename(&backup_path, &old_backup)
+            .map_err(|e| JotError::Other(format!("Failed to rotate backup: {}", e).into()))?;
+    }
+
+    Ok(())
 }
 
 /// Get the directory where the journal is stored
@@ -110,30 +146,82 @@ pub fn journal_exists() -> bool {
 // ! Config Related
 
 /// Get the path to the config file
-pub fn get_config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
-    let mut path = get_journal_dir()?;
+pub fn get_config_path() -> JotResult<PathBuf> {
+    let mut path = get_journal_dir()
+        .map_err(|e| JotError::Other(format!("Failed to get journal directory: {}", e).into()))?;
     path.push(CONFIG_FILE);
     Ok(path)
 }
 
-/// Load configuration from the config file
-pub fn load_config() -> Result<Config, Box<dyn std::error::Error>> {
+/// Load configuration from the config file with validation
+pub fn load_config() -> JotResult<Config> {
     let config_path = get_config_path()?;
-    // println!("config loaded");
+    
     if !config_path.exists() {
         return Ok(Config::default());
     }
 
-    let content = fs::read_to_string(config_path)?;
-    let config: Config = toml::from_str(&content)?;
+    let content = fs::read_to_string(&config_path)
+        .map_err(|e| JotError::IoError(e))?;
+
+    // Basic TOML validation
+    if !content.trim().starts_with('[') {
+        return Err(JotError::TomlParseError(toml::de::Error::custom(
+            "Invalid TOML format: must start with a table header"
+        )));
+    }
+
+    let config: Config = toml::from_str(&content)
+        .map_err(|e| JotError::TomlParseError(e))?;
+
+    // Validate export directory path
+    if !config.journal_cfg.export_dir.is_empty() {
+        let export_path = PathBuf::from(&config.journal_cfg.export_dir);
+        if export_path.is_absolute() && !export_path.exists() {
+            fs::create_dir_all(&export_path)
+                .map_err(|e| JotError::Other(format!("Failed to create export directory: {}", e).into()))?;
+        }
+    }
+
     Ok(config)
 }
 
-/// Save configuration to the config file
-pub fn save_config(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+/// Save configuration to the config file with atomic write
+pub fn save_config(config: &Config) -> JotResult<()> {
     let config_path = get_config_path()?;
-    let content = toml::to_string(config)?;
-    fs::write(config_path, content)?;
+    let temp_path = config_path.with_extension("toml.tmp");
+    
+    // Create parent directories if they don't exist
+    if let Some(parent) = config_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| JotError::Other(format!("Failed to create config directory: {}", e).into()))?;
+    }
+
+    // Serialize config with pretty formatting
+    let content = toml::to_string_pretty(config)
+        .map_err(|e| JotError::TomlSerializeError(e))?;
+
+    // Write to temporary file first
+    {
+        let mut temp_file = File::create(&temp_path)
+            .map_err(|e| JotError::IoError(e))?;
+        temp_file.write_all(content.as_bytes())
+            .map_err(|e| JotError::IoError(e))?;
+        temp_file.sync_all()
+            .map_err(|e| JotError::IoError(e))?;
+    }
+
+    // Backup existing config if it exists
+    if config_path.exists() {
+        let backup_path = config_path.with_extension(format!("toml{}", BACKUP_EXTENSION));
+        fs::copy(&config_path, &backup_path)
+            .map_err(|e| JotError::Other(format!("Failed to backup config: {}", e).into()))?;
+    }
+
+    // Atomically rename temporary file to actual config file
+    fs::rename(&temp_path, &config_path)
+        .map_err(|e| JotError::IoError(e))?;
+
     Ok(())
 }
 
