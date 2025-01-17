@@ -9,6 +9,7 @@ use crate::{
 #[derive(clap::Args, Clone)]
 pub struct SearchArgs {
     pub query: String,
+    #[clap(long, value_delimiter = ' ')]
     pub tags: Vec<String>,
     #[clap(long)]
     pub from: Option<String>,
@@ -16,6 +17,8 @@ pub struct SearchArgs {
     pub to: Option<String>,
     #[clap(short, long)]
     pub fuzzy: bool,
+    #[clap(short, long)]
+    pub all: bool,
 }
 
 pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResult<()> {
@@ -50,7 +53,13 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
                     if date < e.date {
                         return false;
                     }
-                }
+                };
+
+                let match_type = if args.all {
+                    TagMatch::All
+                } else {
+                    TagMatch::Any
+                };
 
                 utils::do_tags_match(
                     &args
@@ -59,7 +68,7 @@ pub fn execute(journal: &Journal, args: SearchArgs, config: &Config) -> JotResul
                         .map(|t| Tag::new(t.to_string()))
                         .collect::<Vec<_>>(),
                     &e.tags,
-                    TagMatch::Any,
+                    match_type,
                 ) && content_matches
             })
             .map(|e| utils::format_entry(e, config.journal_cfg.clone()))

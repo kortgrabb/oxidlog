@@ -66,6 +66,21 @@ enum Commands {
     },
 }
 
+/// Runs a single command based on the parsed CLI arguments
+///
+/// # Arguments
+///
+/// * `config` - Configuration settings loaded from the config file
+///
+/// # Returns
+///
+/// Returns `JotResult<()>` indicating success or error
+///
+/// # Errors
+///
+/// Will return a `JotError` if:
+/// * Journal loading fails
+/// * Any command-specific execution errors occur
 pub fn run(config: &Config) -> JotResult<()> {
     let cli = Cli::parse();
 

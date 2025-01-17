@@ -3,7 +3,6 @@ use crate::storage::{self, Journal};
 
 #[derive(clap::Args, Clone)]
 pub struct RemoveArgs {
-    #[clap(short, long)]
     pub id: Option<usize>,
     #[clap(short, long)]
     pub range: Option<String>,
