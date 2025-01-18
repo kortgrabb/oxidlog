@@ -93,15 +93,15 @@ pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
 }
 
 pub fn fuzzy_match(haystack: &str, needle: &str) -> bool {
-    let mut needle_chars = needle.chars();
+    let needle_chars = needle.chars();
     let mut haystack_chars = haystack.chars();
 
-    while let Some(needle_char) = needle_chars.next() {
+    for needle_char in needle_chars {
         if let Some(haystack_char) = haystack_chars.next() {
             if needle_char == haystack_char {
                 continue;
             } else {
-                while let Some(next_haystack_char) = haystack_chars.next() {
+                for next_haystack_char in haystack_chars.by_ref() {
                     if needle_char == next_haystack_char {
                         break;
                     }

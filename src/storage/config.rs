@@ -38,7 +38,7 @@ mod tests {
         let serialized = toml::to_string(&config).unwrap();
         let deserialized: Config = toml::from_str(&serialized).unwrap();
 
-        assert_eq!(deserialized.journal_cfg.body_tags, true);
-        assert_eq!(deserialized.journal_cfg.show_time, true);
+        assert!(deserialized.journal_cfg.body_tags);
+        assert!(deserialized.journal_cfg.show_time);
     }
 }

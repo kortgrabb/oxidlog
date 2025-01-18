@@ -1,4 +1,4 @@
 [journal_cfg]
-body_tags = true
+body_tags = false
 show_time = true
 export_dir = "exports"

@@ -1,40 +1,12 @@
 [
   {
     "id": 1,
-    "timestamp": "2025-01-16T10:05:47.587959862Z",
-    "date": "2025-01-16",
-    "body": "This is a minecraft note",
+    "timestamp": "2025-01-18T12:14:13.565478555Z",
+    "date": "2025-01-18",
+    "body": "my first #note",
     "tags": [
-      {
-        "name": "mc"
-      },
       {
         "name": "note"
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "timestamp": "2025-01-16T10:05:54.128748138Z",
-    "date": "2025-01-16",
-    "body": "This is a general note",
-    "tags": [
-      {
-        "name": "general"
-      },
-      {
-        "name": "note"
-      }
-    ]
-  },
-  {
-    "id": 3,
-    "timestamp": "2025-01-17T23:05:56.148193491Z",
-    "date": "2025-01-17",
-    "body": "hi there",
-    "tags": [
-      {
-        "name": "niote"
       }
     ]
   }

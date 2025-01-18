@@ -155,11 +155,14 @@ impl Journal {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Days;
 
     #[test]
     fn test_entry_creation() {
-        let entry = Entry::new(1, "Test entry".to_string(), vec![Tag::new("test".to_string())]);
+        let entry = Entry::new(
+            1,
+            "Test entry".to_string(),
+            vec![Tag::new("test".to_string())],
+        );
         assert_eq!(entry.id, 1);
         assert_eq!(entry.body, "Test entry");
         assert_eq!(entry.tags[0].name, "test");
@@ -169,9 +172,12 @@ mod tests {
     #[test]
     fn test_entry_creation_with_details() {
         let body = "Test entry".to_string();
-        let tags = vec![Tag::new("test".to_string()), Tag::new("important".to_string())];
+        let tags = vec![
+            Tag::new("test".to_string()),
+            Tag::new("important".to_string()),
+        ];
         let entry = Entry::new(1, body.clone(), tags.clone());
-        
+
         assert_eq!(entry.id, 1);
         assert_eq!(entry.body, body);
         assert_eq!(entry.tags, tags);
@@ -242,7 +248,7 @@ mod tests {
         entry.body = "Updated content".to_string();
         entry.tags = vec![Tag::new("updated".to_string())];
         journal.update_entry(entry);
-        
+
         let updated = journal.get_entry(2).unwrap();
         assert_eq!(updated.body, "Updated content");
         assert_eq!(updated.tags, vec![Tag::new("updated".to_string())]);
@@ -287,7 +293,7 @@ mod tests {
 
         let entries = journal.get_entries();
         let first_date = entries[0].date;
-        
+
         // Verify all entries have the same date
         assert!(entries.iter().all(|e| e.date == first_date));
         assert_eq!(entries.len(), 3);

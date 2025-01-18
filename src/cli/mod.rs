@@ -1,4 +1,4 @@
-use crate::commands::init;
+use crate::commands::{backup, init};
 use crate::error::{JotError, JotResult};
 use crate::storage::config::Config;
 use crate::{commands, storage};
@@ -64,6 +64,12 @@ enum Commands {
         #[clap(flatten)]
         args: export::ExportArgs,
     },
+
+    #[command(visible_alias = "b")]
+    Backup {
+        #[clap(flatten)]
+        args: backup::BackupArgs,
+    },
 }
 
 /// Runs a single command based on the parsed CLI arguments
@@ -98,6 +104,7 @@ pub fn run(config: &Config) -> JotResult<()> {
                 Commands::Edit { args } => commands::edit::execute(&mut journal, args),
                 Commands::Search { args } => commands::search::execute(&journal, args, config),
                 Commands::Export { args } => commands::export::execute(&mut journal, args, config),
+                Commands::Backup { args } => commands::backup::execute(&mut journal, args),
                 _ => Ok(()),
             }
         }
