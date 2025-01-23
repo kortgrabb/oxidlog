@@ -34,6 +34,12 @@ pub enum JotError {
 
     #[error("Failed to execute command: {0}")]
     CommandError(String),
+
+    #[error("Backup error: {0}")]
+    BackupError(String),
+
+    #[error("Search error: {0}")]
+    SearchError(String),
 }
 
 impl From<&str> for JotError {

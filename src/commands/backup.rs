@@ -30,30 +30,30 @@ pub struct BackupArgs {
 
 pub fn execute(journal: &mut Journal, args: BackupArgs) -> JotResult<()> {
     match args.action {
-        BackupAction::Create => create(journal),
-        BackupAction::Restore => restore(journal),
+        BackupAction::Create => create_backup(journal),
+        BackupAction::Restore => restore_backup(journal),
     }
 }
 
-fn create(journal: &Journal) -> JotResult<()> {
-    let backup_creater = storage::Backup::from_journal(journal);
-    backup_creater.create()?;
+fn create_backup(journal: &Journal) -> JotResult<()> {
+    let backup = storage::Backup::from_journal(journal);
+    backup.create()?;
 
     println!(
         "Backup created at: {}",
-        backup_creater.backup_path.to_string_lossy().green()
+        backup.backup_path.to_string_lossy().green()
     );
 
     Ok(())
 }
 
-fn restore(journal: &mut Journal) -> JotResult<()> {
-    let backup_creater = storage::Backup::from_journal(journal);
-    backup_creater.restore()?;
+fn restore_backup(journal: &mut Journal) -> JotResult<()> {
+    let backup = storage::Backup::from_journal(journal);
+    backup.restore()?;
 
     println!(
         "Backup restored from: {}",
-        backup_creater.backup_path.to_string_lossy().green()
+        backup.backup_path.to_string_lossy().green()
     );
 
     Ok(())

@@ -4,6 +4,15 @@ use colored::Colorize;
 
 use crate::storage::{config::JournalConfig, Entry, Journal, Tag};
 
+/// Prompts the user for input and returns the trimmed input as a String.
+///
+/// # Arguments
+///
+/// * `prompt` - A string slice that holds the prompt message to display to the user.
+///
+/// # Returns
+///
+/// A `String` containing the user's input.
 pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt);
     io::stdout().flush().unwrap();
@@ -17,6 +26,17 @@ pub enum TagMatch {
     All, // AND operation
 }
 
+/// Checks if the tags in the query match the tags in the entry based on the match type.
+///
+/// # Arguments
+///
+/// * `query_tags` - A slice of `Tag` representing the tags to query.
+/// * `entry_tags` - A slice of `Tag` representing the tags in the entry.
+/// * `match_type` - A `TagMatch` enum indicating whether to match any or all tags.
+///
+/// # Returns
+///
+/// A boolean indicating whether the tags match.
 pub fn do_tags_match(query_tags: &[Tag], entry_tags: &[Tag], match_type: TagMatch) -> bool {
     if query_tags.is_empty() {
         return true;
@@ -28,16 +48,44 @@ pub fn do_tags_match(query_tags: &[Tag], entry_tags: &[Tag], match_type: TagMatc
     }
 }
 
-// Helper function for parsing multiple tags from strings
+/// Parses a string of tags separated by whitespace into a vector of `Tag` structs.
+///
+/// # Arguments
+///
+/// * `tags` - A string slice containing the tags separated by whitespace.
+///
+/// # Returns
+///
+/// A vector of `Tag` structs.
 pub fn parse_tags(tags: &str) -> Vec<Tag> {
     tags.split_whitespace()
         .map(|t| t.parse::<Tag>().unwrap())
         .collect()
 }
 
+/// Parses a date string in the format "YYYY-MM-DD" into a `NaiveDate` struct.
+///
+/// # Arguments
+///
+/// * `date` - A string slice containing the date in "YYYY-MM-DD" format.
+///
+/// # Returns
+///
+/// A `NaiveDate` struct representing the parsed date.
 pub fn parse_date(date: &str) -> chrono::NaiveDate {
     chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").unwrap()
 }
+
+/// Formats a journal entry into a string for display.
+///
+/// # Arguments
+///
+/// * `entry` - A reference to the `Entry` struct to format.
+/// * `cfg` - A `JournalConfig` struct containing configuration settings.
+///
+/// # Returns
+///
+/// A `String` containing the formatted entry.
 pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     let mut formatted = String::new();
     formatted.push_str(
@@ -92,6 +140,16 @@ pub fn format_entry(entry: &Entry, cfg: JournalConfig) -> String {
     formatted
 }
 
+/// Performs a fuzzy match of the needle string within the haystack string.
+///
+/// # Arguments
+///
+/// * `haystack` - A string slice representing the text to search within.
+/// * `needle` - A string slice representing the text to search for.
+///
+/// # Returns
+///
+/// A boolean indicating whether the needle was found in the haystack.
 pub fn fuzzy_match(haystack: &str, needle: &str) -> bool {
     let needle_chars = needle.chars();
     let mut haystack_chars = haystack.chars();
@@ -115,6 +173,12 @@ pub fn fuzzy_match(haystack: &str, needle: &str) -> bool {
     true
 }
 
+/// Views a journal entry by its ID.
+///
+/// # Arguments
+///
+/// * `journal` - A reference to the `Journal` struct containing the entries.
+/// * `id` - The ID of the entry to view.
 pub fn view_by_id(journal: &Journal, id: usize) {
     if let Some(entry) = journal.entries().iter().find(|e| e.id == id) {
         print_single_entry(entry);
@@ -123,6 +187,11 @@ pub fn view_by_id(journal: &Journal, id: usize) {
     }
 }
 
+/// Prints a single journal entry.
+///
+/// # Arguments
+///
+/// * `entry` - A reference to the `Entry` struct to print.
 pub fn print_single_entry(entry: &Entry) {
     println!("\n{}", "=".repeat(50));
     println!("Entry #{}", entry.id);
