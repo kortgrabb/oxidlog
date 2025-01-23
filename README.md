@@ -1,4 +1,4 @@
-# [BIG WIP] OxidLog - A Personal Knowledge Manager
+# [WIP] OxidLog - A Personal Knowledge Manager
 
 This is a powerful tool that allows you to take notes, todos, or even journal!
 With many different features you can make this tool what you need it to be.
@@ -46,6 +46,36 @@ Find specific entries using keywords
 ```bash
 xlog search "meeting" --tags "important"
 ```
+
+## Commands
+
+### `xlog init`
+Initialize a new journal or reconfigure an existing one.
+
+### `xlog add "content"`
+Add a new entry to your journal with the specified content.
+
+### `xlog remove [id]`
+Remove an entry from your journal by its ID.
+
+### `xlog view`
+View all journal entries.
+
+### `xlog edit [id]`
+Edit an existing journal entry by its ID.
+
+### `xlog search "query"`
+Search through journal entries using a query.
+
+### `xlog export --format [json|csv|plain]`
+Export journal entries to various formats.
+
+### `xlog backup --action [create|restore]`
+Create or restore a backup of your journal.
+
+## Data and Config Location
+
+The data and config files are located in the `.oxidlog` directory in your home folder. The config file is named `config.toml` and the journal data is stored in `journal.json`.
 
 ## Learn more
 Use the 'help' command to explore all available options
