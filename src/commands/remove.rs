@@ -28,47 +28,72 @@ fn remove_entry(journal: &mut Journal, id: usize) -> JotResult<()> {
     }
 }
 
+fn remove_entries_by_range(journal: &mut Journal, range: &str) -> JotResult<Vec<usize>> {
+    let range_parts: Vec<&str> = range.split("..").collect();
+    if range_parts.len() != 2 {
+        return Err(JotError::RemoveError(
+            "Invalid range format. Use start..end".to_string(),
+        ));
+    }
+
+    let start = range_parts[0]
+        .parse::<usize>()
+        .map_err(|_| JotError::RemoveError("Invalid range start".to_string()))?;
+    let end = range_parts[1]
+        .parse::<usize>()
+        .map_err(|_| JotError::RemoveError("Invalid range end".to_string()))?;
+
+    Ok((start..=end).collect())
+}
+
+fn remove_entries_by_date_range(journal: &Journal, from: &str, to: &str) -> JotResult<Vec<usize>> {
+    let from_date = utils::parse_date(from);
+    let to_date = utils::parse_date(to);
+    Ok(journal
+        .get_entries()
+        .iter()
+        .filter(|e| e.date >= from_date && e.date <= to_date)
+        .map(|e| e.id)
+        .collect())
+}
+
+fn remove_entries_from_date(journal: &Journal, from: &str) -> JotResult<Vec<usize>> {
+    let from_date = utils::parse_date(from);
+    Ok(journal
+        .get_entries()
+        .iter()
+        .filter(|e| e.date >= from_date)
+        .map(|e| e.id)
+        .collect())
+}
+
+fn remove_entries_to_date(journal: &Journal, to: &str) -> JotResult<Vec<usize>> {
+    let to_date = utils::parse_date(to);
+    Ok(journal
+        .get_entries()
+        .iter()
+        .filter(|e| e.date <= to_date)
+        .map(|e| e.id)
+        .collect())
+}
+
 pub fn execute(journal: &mut Journal, args: RemoveArgs) -> JotResult<()> {
     let mut to_remove = Vec::new();
-    let entries = journal.get_entries();
 
     if let Some(id) = args.id {
         to_remove.push(id);
     }
 
     if let Some(range) = args.range {
-        let range_parts: Vec<&str> = range.split("..").collect();
-        if range_parts.len() != 2 {
-            return Err(JotError::RemoveError(
-                "Invalid range format. Use start..end".to_string(),
-            ));
-        }
-
-        let start = range_parts[0]
-            .parse::<usize>()
-            .map_err(|_| JotError::RemoveError("Invalid range start".to_string()))?;
-        let end = range_parts[1]
-            .parse::<usize>()
-            .map_err(|_| JotError::RemoveError("Invalid range end".to_string()))?;
-
-        to_remove.extend(start..=end);
+        to_remove.extend(remove_entries_by_range(journal, &range)?);
     }
 
     if let (Some(from), Some(to)) = (args.from.as_ref(), args.to.as_ref()) {
-        let from_date = utils::parse_date(from);
-        let to_date = utils::parse_date(to);
-        to_remove.extend(
-            entries
-                .iter()
-                .filter(|e| e.date >= from_date && e.date <= to_date)
-                .map(|e| e.id),
-        );
+        to_remove.extend(remove_entries_by_date_range(journal, from, to)?);
     } else if let Some(from) = args.from {
-        let from_date = crate::utils::parse_date(&from);
-        to_remove.extend(entries.iter().filter(|e| e.date >= from_date).map(|e| e.id));
+        to_remove.extend(remove_entries_from_date(journal, &from)?);
     } else if let Some(to) = args.to {
-        let to_date = crate::utils::parse_date(&to);
-        to_remove.extend(entries.iter().filter(|e| e.date <= to_date).map(|e| e.id));
+        to_remove.extend(remove_entries_to_date(journal, &to)?);
     }
 
     if to_remove.is_empty() {

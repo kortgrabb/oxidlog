@@ -93,20 +93,33 @@ pub fn run(config: &Config) -> JotResult<()> {
     // Only load journal for commands that need it
     match cli.command {
         Commands::Init { args } => commands::init::execute(args),
-        _ => {
-            let mut journal = storage::load_journal()
-                .map_err(|e| JotError::Other(Box::new(e) as Box<dyn std::error::Error>))?;
-
-            match cli.command {
-                Commands::Add { args } => commands::add::execute(&mut journal, args, config),
-                Commands::Remove { args } => commands::remove::execute(&mut journal, args),
-                Commands::View { args } => commands::view::execute(&journal, args, config),
-                Commands::Edit { args } => commands::edit::execute(&mut journal, args),
-                Commands::Search { args } => commands::search::execute(&journal, args, config),
-                Commands::Export { args } => commands::export::execute(&mut journal, args, config),
-                Commands::Backup { args } => commands::backup::execute(&mut journal, args),
-                _ => Ok(()),
-            }
+        Commands::Add { args } => {
+            let mut journal = storage::load_journal()?;
+            commands::add::execute(&mut journal, args, config)
+        }
+        Commands::Remove { args } => {
+            let mut journal = storage::load_journal()?;
+            commands::remove::execute(&mut journal, args)
+        }
+        Commands::View { args } => {
+            let journal = storage::load_journal()?;
+            commands::view::execute(&journal, args, config)
+        }
+        Commands::Edit { args } => {
+            let mut journal = storage::load_journal()?;
+            commands::edit::execute(&mut journal, args)
+        }
+        Commands::Search { args } => {
+            let journal = storage::load_journal()?;
+            commands::search::execute(&journal, args, config)
+        }
+        Commands::Export { args } => {
+            let journal = storage::load_journal()?;
+            commands::export::execute(&journal, args, config)
+        }
+        Commands::Backup { args } => {
+            let mut journal = storage::load_journal()?;
+            commands::backup::execute(&mut journal, args)
         }
     }
 }

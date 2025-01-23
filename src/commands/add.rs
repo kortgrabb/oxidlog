@@ -15,21 +15,8 @@ pub fn execute(journal: &mut Journal, args: AddArgs, config: &Config) -> JotResu
         return Err(JotError::AddError("Entry cannot be empty".to_string()));
     }
 
-    let tags: Vec<Tag> = content
-        .split_whitespace()
-        .filter(|w| w.starts_with('#'))
-        .map(|w| Tag::new(w[1..].to_string()))
-        .collect();
-
-    let body = if config.journal_cfg.body_tags {
-        content
-            .split_whitespace()
-            .filter(|w| !w.starts_with('#'))
-            .collect::<Vec<&str>>()
-            .join(" ")
-    } else {
-        content.to_string()
-    };
+    let tags = extract_tags(content);
+    let body = extract_body(content, config);
 
     let entry = Entry::new(journal.next_id(), body, tags);
     journal.add_entry(entry);
@@ -41,4 +28,24 @@ pub fn execute(journal: &mut Journal, args: AddArgs, config: &Config) -> JotResu
     );
 
     Ok(())
+}
+
+fn extract_tags(content: &str) -> Vec<Tag> {
+    content
+        .split_whitespace()
+        .filter(|w| w.starts_with('#'))
+        .map(|w| Tag::new(w[1..].to_string()))
+        .collect()
+}
+
+fn extract_body(content: &str, config: &Config) -> String {
+    if config.journal_cfg.body_tags {
+        content
+            .split_whitespace()
+            .filter(|w| !w.starts_with('#'))
+            .collect::<Vec<&str>>()
+            .join(" ")
+    } else {
+        content.to_string()
+    }
 }

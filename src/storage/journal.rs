@@ -59,40 +59,6 @@ impl Entry {
     }
 }
 
-// #[derive(Default)]
-// pub struct EntryBuilder {
-//     id: Option<usize>,
-//     content: Option<String>,
-//     tags: Option<Vec<String>>,
-// }
-
-// impl EntryBuilder {
-//     pub fn id(mut self, id: usize) -> Self {
-//         self.id = Some(id);
-//         self
-//     }
-
-//     pub fn content(mut self, content: String) -> Self {
-//         self.content = Some(content);
-//         self
-//     }
-
-//     pub fn tags(mut self, tags: Vec<String>) -> Self {
-//         self.tags = Some(tags);
-//         self
-//     }
-
-//     pub fn build(self) -> Entry {
-//         Entry {
-//             id: self.id.expect("id is required"),
-//             timestamp: Utc::now(),
-//             date: Utc::now().naive_utc().date(),
-//             body: self.content.expect("content is required"),
-//             tags: self.tags.unwrap_or_default(),
-//         }
-//     }
-// }
-
 pub struct Journal {
     path: PathBuf,
     entries: Vec<Entry>,
