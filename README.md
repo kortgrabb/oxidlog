@@ -73,6 +73,10 @@ Export journal entries to various formats.
 ### `xlog backup --action [create|restore]`
 Create or restore a backup of your journal.
 
+## Data and Config Location
+
+The data and config files are located in the `.oxidlog` directory in your home folder. The config file is named `config.toml` and the journal data is stored in `journal.json`.
+
 ## Learn more
 Use the 'help' command to explore all available options
 ```bash
