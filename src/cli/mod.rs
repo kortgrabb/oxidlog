@@ -114,8 +114,8 @@ pub fn run(config: &Config) -> JotResult<()> {
             commands::search::execute(&journal, args, config)
         }
         Commands::Export { args } => {
-            let journal = storage::load_journal()?;
-            commands::export::execute(&journal, args, config)
+            let mut journal = storage::load_journal()?;
+            commands::export::execute(&mut journal, args, config)
         }
         Commands::Backup { args } => {
             let mut journal = storage::load_journal()?;

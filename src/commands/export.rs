@@ -1,9 +1,9 @@
 use crate::{
     error::{JotError, JotResult},
-    storage::{config::Config, Journal},
+    storage::{config::Config, Entry, Journal},
 };
 use chrono::Local;
-use std::fs;
+use std::{fs, path::Path};
 
 #[derive(clap::Args, Clone)]
 pub struct ExportArgs {
@@ -15,7 +15,7 @@ pub struct ExportArgs {
     pub open: bool,
 }
 
-#[derive(clap::ValueEnum, Clone)]
+#[derive(clap::ValueEnum, Clone, Copy)]
 pub enum ExportFormat {
     Json,
     Csv,

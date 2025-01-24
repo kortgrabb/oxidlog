@@ -37,8 +37,6 @@ fn main() {
             error::JotError::ExportError(_) => "Export",
             error::JotError::CommandError(_) => "Command",
             error::JotError::Other(_) => "Unknown",
-            error::JotError::BackupError(_) => "Backup",
-            error::JotError::SearchError(_) => "Search",
         };
 
         eprintln!("\n{} {} Error", "Error:".red().bold(), error_type);
